@@ -5,6 +5,8 @@ Sedgewick & Wayne, *Algorithms* 4th edition.
 
 **Live: https://jabay7.github.io/csc301/**
 
+**Final Lab (hand-trace drills + mock final): https://jabay7.github.io/csc301/final-lab.html**
+
 One self-contained HTML file. No build step, no dependencies, no tracking, no
 analytics, no cookies — nothing is collected and nothing leaves your browser.
 Flashcard and quiz progress is saved in `localStorage`, so it stays on your own

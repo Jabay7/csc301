@@ -1,0 +1,1107 @@
+<title>CSC 301 Final Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sidebar of topics (stacks on phones) + one "lab bench": idea card, stage (pictures), narration, question, controls. Graph-paper ground. */
+:root{
+  --bg:#f4f6fa; --paper:#ffffff; --ink:#18202d; --soft:#5b6576; --line:#d5dbe6; --grid:rgba(47,91,234,.06);
+  --accent:#2f5bea; --accent-soft:#e3eaff; --marker:#ffe066; --marker-ink:#4a3b00;
+  --red:#d9372b; --red-soft:#fde4e1; --ok:#178a55; --ok-soft:#dcf5e8; --warn:#b26a00;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f131b; --paper:#171d28; --ink:#e7ebf3; --soft:#9aa5b8; --line:#2c3546; --grid:rgba(125,155,255,.06);
+  --accent:#7d9bff; --accent-soft:#1f2a47; --marker:#6b5714; --marker-ink:#fff3c4;
+  --red:#ff6b5e; --red-soft:#3d1c1a; --ok:#4fd08f; --ok-soft:#14321f; --warn:#f0b04a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131b; --paper:#171d28; --ink:#e7ebf3; --soft:#9aa5b8; --line:#2c3546; --grid:rgba(125,155,255,.06);
+  --accent:#7d9bff; --accent-soft:#1f2a47; --marker:#6b5714; --marker-ink:#fff3c4;
+  --red:#ff6b5e; --red-soft:#3d1c1a; --ok:#4fd08f; --ok-soft:#14321f; --warn:#f0b04a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;max-width:1280px;margin:0 auto;
+  padding-block:18px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:26px;font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:16px;font-weight:600}
+code,.mono{font-family:var(--mono)}
+nav{position:sticky;top:max(12px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:14px}
+@media (max-width:860px){nav{position:static}}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand small{color:var(--soft);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.group{display:flex;flex-direction:column;gap:4px}
+.group > span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding-left:4px}
+@media (max-width:860px){.groups{display:flex;flex-wrap:wrap;gap:10px}.group{flex:1 1 180px}}
+.tbtn{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid transparent;background:transparent;
+  color:var(--ink);font:500 14px var(--body);padding:7px 10px;border-radius:8px;cursor:pointer}
+.tbtn:hover{background:var(--paper);border-color:var(--line)}
+.tbtn.on{background:var(--paper);border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.tbtn .pct{font:600 11px var(--mono);color:var(--soft)}
+.tbtn .pct.full{color:var(--ok)}
+.tag{display:inline-block;font:600 10px var(--mono);letter-spacing:.06em;padding:1px 6px;border-radius:99px;background:var(--red-soft);color:var(--red)}
+main{min-width:0;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.idea{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px}
+@media (max-width:760px){.idea{grid-template-columns:minmax(0,1fr)}}
+.idea .analogy{font-size:16px}
+.idea .analogy b{background:linear-gradient(transparent 60%,var(--marker) 60%);color:inherit}
+.idea ul{margin:6px 0 0;padding-left:18px}
+.idea li{margin:3px 0}
+.traps{border-left:3px solid var(--red);padding-left:10px;margin-top:8px;font-size:14px}
+.traps b{color:var(--red)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.head p{margin:2px 0 0;color:var(--soft)}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.mode{border:1px solid var(--line);background:var(--paper);color:var(--ink);font:600 13px var(--body);padding:8px 12px;border-radius:99px;cursor:pointer}
+.mode.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.mode:focus-visible,.tbtn:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}
+@media (max-width:1080px){.bench{grid-template-columns:minmax(0,1fr)}}
+.stage{min-height:300px;display:flex;flex-direction:column;gap:12px;overflow-x:auto}
+.stage .row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.stage .row > *{min-width:0}
+.cap{font-size:12px;color:var(--soft);font-family:var(--mono)}
+.say{font-size:16px;line-height:1.55;min-height:48px}
+.say b{color:var(--accent)}
+.say .hi{background:var(--marker);color:var(--marker-ink);padding:0 4px;border-radius:3px}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+pre.code{margin:0;font:12.5px/1.6 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 0;overflow-x:auto}
+pre.code div{padding:0 10px;white-space:pre;border-left:3px solid transparent}
+pre.code div.on{background:var(--marker);color:var(--marker-ink);border-left-color:var(--warn)}
+.ask{border:2px solid var(--accent);border-radius:12px;padding:12px 14px;background:var(--accent-soft);display:flex;flex-direction:column;gap:10px}
+.ask .q{font-weight:600;font-size:16px}
+.ask .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ask input{font:600 16px var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);min-width:0;flex:1 1 180px}
+.btn{font:600 14px var(--body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0f131b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0f131b}}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.choice{font:600 14px var(--body);padding:8px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--paper);color:var(--ink);cursor:pointer}
+.choice.right{background:var(--ok-soft);border-color:var(--ok)}
+.choice.wrong{background:var(--red-soft);border-color:var(--red)}
+.fb{font-size:14px;padding:8px 10px;border-radius:8px}
+.fb.ok{background:var(--ok-soft);color:var(--ink);border:1px solid var(--ok)}
+.fb.no{background:var(--red-soft);color:var(--ink);border:1px solid var(--red)}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.prog{flex:1 1 120px;height:6px;background:var(--line);border-radius:99px;overflow:hidden;min-width:80px}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.score{font:600 13px var(--mono);color:var(--soft)}
+/* arrays */
+table.arr{border-collapse:collapse;font-family:var(--mono)}
+table.arr th{font-size:11px;color:var(--soft);font-weight:400;padding:0 0 2px;text-align:center}
+table.arr td{width:40px;height:40px;border:1.5px solid var(--ink);text-align:center;font-weight:600;font-size:16px;background:var(--paper);transition:background .3s}
+table.arr td.new{background:var(--marker);color:var(--marker-ink);animation:pop .45s}
+table.arr td.probe{background:var(--accent-soft)}
+table.arr td.home{box-shadow:inset 0 0 0 3px var(--accent)}
+table.arr td.gone{background:var(--red-soft);color:var(--red)}
+table.arr td.dim{color:var(--soft)}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.lbl{font:600 12px var(--mono);color:var(--soft);margin-bottom:2px}
+table.mini{border-collapse:collapse;font:13px var(--mono)}
+table.mini th,table.mini td{border:1px solid var(--line);padding:2px 8px;text-align:center}
+table.mini th{color:var(--soft);font-weight:400}
+table.mini td.new{background:var(--marker);color:var(--marker-ink)}
+/* chains + lists */
+.chains{display:flex;flex-direction:column;gap:6px;font-family:var(--mono)}
+.chains .r{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chains .ix{width:34px;height:34px;border:1.5px solid var(--ink);display:grid;place-items:center;font-weight:600;background:var(--paper)}
+.chains .ix.on{box-shadow:inset 0 0 0 3px var(--accent)}
+.nd{display:inline-flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;font-weight:600;background:var(--paper)}
+.nd span{padding:4px 7px}.nd span+span{border-left:1px solid var(--line);color:var(--soft)}
+.nd.new{background:var(--marker);color:var(--marker-ink);animation:pop .45s}
+.nd.new span+span{color:var(--marker-ink)}
+.nd.upd span+span{background:var(--marker);color:var(--marker-ink)}
+.arrow{color:var(--soft)}
+.null{color:var(--soft);font-style:italic}
+/* svg */
+svg text{font-family:var(--mono);font-weight:600}
+svg .edge{stroke:var(--soft);stroke-width:1.8}
+svg .edge.tree{stroke:var(--accent);stroke-width:4}
+svg .edge.redl{stroke:var(--red);stroke-width:5}
+svg .edge.now{stroke:var(--warn);stroke-width:4;stroke-dasharray:6 4}
+svg .vx{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .vx.marked{fill:var(--accent-soft);stroke:var(--accent)}
+svg .vx.queued{fill:var(--accent-soft);stroke:var(--accent);stroke-dasharray:4 3}
+svg .vx.done{fill:var(--ok-soft);stroke:var(--ok)}
+svg .vx.cur{fill:var(--marker);stroke:var(--warn);stroke-width:3.5}
+svg .vx.path{fill:var(--accent-soft);stroke:var(--accent)}
+svg .vx.new{fill:var(--marker);stroke:var(--warn);stroke-width:3}
+svg .vx.gone{fill:var(--red-soft);stroke:var(--red)}
+svg .t{fill:var(--ink);font-size:15px}
+svg .vx.cur + .t, svg .vx.new + .t{fill:var(--marker-ink)}
+svg .box{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .box.hl{fill:var(--marker);stroke:var(--warn);stroke-width:3}
+svg .box.over{fill:var(--red-soft);stroke:var(--red);stroke-width:3}
+svg .box.path{fill:var(--accent-soft);stroke:var(--accent)}
+svg .sep{stroke:var(--ink);stroke-width:1.2}
+svg .lab{fill:var(--soft);font-size:11px;font-weight:400}
+.adj{font:13px/1.7 var(--mono);display:grid;grid-template-columns:repeat(2,max-content);column-gap:22px}
+.adj div.cur{background:var(--accent-soft);border-radius:4px;padding:0 4px;margin:0 -4px}
+.adj .ptr{background:var(--marker);color:var(--marker-ink);padding:0 3px;border-radius:3px}
+.adj .seen{color:var(--soft);text-decoration:line-through}
+.stack{display:flex;flex-direction:column-reverse;gap:3px;font:600 13px var(--mono)}
+.stack div{border:1.5px solid var(--ink);border-radius:5px;padding:2px 8px;background:var(--paper)}
+.stack div:last-child{background:var(--marker);color:var(--marker-ink)}
+.queue{display:flex;gap:3px;align-items:center;font:600 15px var(--mono);flex-wrap:wrap}
+.queue div{width:34px;height:34px;border:1.5px solid var(--ink);display:grid;place-items:center;background:var(--paper)}
+.queue div.new{background:var(--marker);color:var(--marker-ink);animation:pop .45s}
+.queue .end{font-size:11px;color:var(--soft);font-weight:400}
+.order{font:600 15px var(--mono);letter-spacing:.06em}
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero p{font-size:16px;max-width:62ch}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:12px;cursor:pointer;font:14px var(--body)}
+.tile:hover{border-color:var(--accent)}
+.tile b{font-family:var(--display);font-size:16px}
+.tile small{color:var(--soft)}
+.bar{height:5px;background:var(--line);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;counter-reset:s}
+@media (max-width:640px){.steps3{grid-template-columns:minmax(0,1fr)}}
+.steps3 div{border-top:3px solid var(--accent);padding-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--soft)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.done-card{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding:20px}
+.big{font:800 44px var(--display)}
+
+.exam-intro{display:flex;flex-direction:column;gap:8px}.exam-intro p,.exam-intro ul{margin:0;max-width:70ch}
+.xbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 16px}
+.xbar .mono{font:600 18px var(--mono)}.xbar .late{color:var(--red)}
+.xlist{display:flex;flex-direction:column;gap:14px}
+.xq{display:flex;flex-direction:column;gap:10px;min-width:0}
+.xprompt{display:flex;flex-direction:column;gap:8px;overflow-x:auto}.xprompt p{margin:0}
+.xpart{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:8px}
+.xpart label{font-weight:600}
+.xin{font:600 16px var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);max-width:420px;width:100%}
+.xcells{overflow-x:auto}.xcells td{padding:0}
+.xcells input{width:40px;height:40px;border:0;text-align:center;font:600 16px var(--mono);background:transparent;color:var(--ink);text-transform:uppercase}
+.okc{background:var(--ok-soft)!important}.badc{background:var(--red-soft)!important}
+.xres:empty{display:none}.xres .arr{margin-top:6px}
+.xsum{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.xtopics td,.xtopics th{padding:3px 10px}
+</style>
+
+<div class="app">
+  <nav aria-label="Topics">
+    <div class="brand"><small>CSC 301 · Data Structures II</small><h1>Final Lab</h1><small style="text-transform:none;letter-spacing:0">Learn it, then do it yourself</small></div>
+    <div class="groups" id="nav"></div>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<script>
+// ============================================================== utilities
+const $ = s => document.querySelector(s);
+const R = n => Math.floor(Math.random() * n);
+const pick = a => a[R(a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = R(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const range = n => [...Array(n).keys()];
+const tokens = s => (String(s).toLowerCase().match(/-?[a-z0-9.]+/g) || []);
+const distinctNums = (n, lo, hi) => shuffle(range(hi - lo + 1).map(i => i + lo)).slice(0, n);
+
+class Run {
+  constructor() { this.frames = []; }
+  show(vis, say, line) { this.frames.push({ vis, say, line }); }
+  ask(vis, q, answer, o = {}) {
+    this.frames.push({ vis, say: o.say || '', line: o.line, ask: { q, answer: String(answer), options: o.options, num: o.num, why: o.why || '' } });
+  }
+}
+
+// ============================================================== drawing: arrays, chains, lists
+function arrHTML(keys, o = {}) {
+  const hl = o.hl || {};
+  return `<div>${o.label ? `<div class="lbl">${o.label}</div>` : ''}<table class="arr"><tr>${keys.map((_, i) => `<th>${o.base ? i + o.base : i}</th>`).join('')}</tr><tr>${keys.map((k, i) => `<td class="${hl[i] || ''}">${k == null ? '' : esc(k)}</td>`).join('')}</tr></table></div>`;
+}
+function hcHTML(hc, keys, hlKey) {
+  return `<div><div class="lbl">hashCodes</div><table class="mini"><tr><th>key</th>${keys.map(k => `<th>${esc(k)}</th>`).join('')}</tr><tr><th>hashCode</th>${keys.map(k => `<td class="${k === hlKey ? 'new' : ''}">${hc[k]}</td>`).join('')}</tr></table></div>`;
+}
+function chainsHTML(chains, o = {}) {
+  return `<div class="chains">${chains.map((ch, i) => `<div class="r"><div class="ix ${o.list === i ? 'on' : ''}">${i}</div><span class="arrow">→</span>${ch.length ? ch.map(([k, v]) => `<span class="nd ${o.key === k ? (o.upd ? 'upd' : 'new') : ''}"><span>${esc(k)}</span><span>${esc(v)}</span></span>`).join('<span class="arrow">→</span>') + '<span class="arrow">→</span>' : ''}<span class="null">null</span></div>`).join('')}</div>`;
+}
+function listHTML(list, o = {}) {
+  return `<div class="chains"><div class="r"><div class="lbl" style="margin:0">first</div><span class="arrow">→</span>${list.map(([k, v]) => `<span class="nd ${o.key === k ? (o.upd ? 'upd' : 'new') : ''}"><span>${esc(k)}</span><span>${esc(v)}</span></span><span class="arrow">→</span>`).join('')}<span class="null">null</span></div></div>`;
+}
+
+// ============================================================== drawing: binary trees (BST / LLRB)
+function treeSVG(root, o = {}) {
+  const items = []; let i = 0, maxd = 0;
+  (function walk(x, d) { if (!x) return; walk(x.left, d + 1); items.push({ x, d, i: i++ }); maxd = Math.max(maxd, d); walk(x.right, d + 1); })(root, 0);
+  if (!items.length) return `<div class="null">(empty tree)</div>`;
+  const gap = 46, W = Math.max(260, items.length * gap + 30), H = maxd * 64 + 56;
+  const pos = new Map(items.map(t => [t.x, [24 + t.i * gap + 8, 28 + t.d * 64]]));
+  const hl = o.hl || {};
+  let e = '', n = '';
+  for (const t of items) {
+    const [x, y] = pos.get(t.x);
+    for (const c of [t.x.left, t.x.right]) if (c) {
+      const [cx, cy] = pos.get(c);
+      e += `<line class="edge ${o.llrb && c.red ? 'redl' : ''}" x1="${x}" y1="${y}" x2="${cx}" y2="${cy}"/>`;
+    }
+  }
+  for (const t of items) {
+    const [x, y] = pos.get(t.x);
+    n += `<circle class="vx ${hl[t.x.key] || ''}" cx="${x}" cy="${y}" r="17"/><text class="t" x="${x}" y="${y + 5}" text-anchor="middle">${esc(t.x.key)}</text>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="tree">${e}${n}</svg>`;
+}
+
+// ============================================================== drawing: 2-3 trees
+function t23SVG(root, o = {}) {
+  const BOX = 30; let cursor = 14, maxd = 0; const pos = new Map();
+  const w = n => n.keys.length * BOX;
+  function place(n, d) {
+    maxd = Math.max(maxd, d);
+    if (!n.kids.length) { const x = cursor + w(n) / 2; cursor += w(n) + 18; pos.set(n, [x, d]); return x; }
+    const xs = n.kids.map(c => place(c, d + 1)); const x = (xs[0] + xs[xs.length - 1]) / 2; pos.set(n, [x, d]); return x;
+  }
+  place(root, 0);
+  const W = Math.max(cursor, 200), H = maxd * 72 + 56, Y = d => 14 + d * 72;
+  let e = '', b = '';
+  for (const [n, [x, d]] of pos) {
+    const left = x - w(n) / 2;
+    n.kids.forEach((c, j) => { const [cx, cd] = pos.get(c); e += `<line class="edge" x1="${left + j * BOX}" y1="${Y(d) + 28}" x2="${cx}" y2="${Y(cd)}"/>`; });
+    const cls = n.keys.length > 2 ? 'over' : (o.hl && o.hl.has(n) ? 'hl' : (o.path && o.path.has(n) ? 'path' : ''));
+    b += `<rect class="box ${cls}" x="${left}" y="${Y(d)}" width="${w(n)}" height="28" rx="6"/>`;
+    n.keys.forEach((k, j) => {
+      if (j) b += `<line class="sep" x1="${left + j * BOX}" y1="${Y(d)}" x2="${left + j * BOX}" y2="${Y(d) + 28}"/>`;
+      b += `<text class="t" x="${left + j * BOX + BOX / 2}" y="${Y(d) + 19}" text-anchor="middle" font-size="14">${k}</text>`;
+    });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="2-3 tree">${e}${b}</svg>`;
+}
+
+// ============================================================== drawing: graphs
+function circlePos(V, W, H) { const p = {}; for (let v = 0; v < V; v++) { const a = -Math.PI / 2 + 2 * Math.PI * v / V; p[v] = [W / 2 + (W / 2 - 34) * Math.cos(a), H / 2 + (H / 2 - 28) * Math.sin(a)]; } return p; }
+function graphSVG(g, st = {}) {
+  const W = g.W, H = g.H, pos = g.pos; let e = '', n = '';
+  const seen = new Set();
+  const treeEdge = (v, w) => st.edgeTo && ((st.edgeTo[w] === v && st.reached && st.reached.has(w)) || (!g.directed && st.edgeTo[v] === w && st.reached && st.reached.has(v)));
+  for (let v = 0; v < g.V; v++) for (const w of g.adj[v]) {
+    const key = g.directed ? v + '>' + w : Math.min(v, w) + '-' + Math.max(v, w);
+    if (seen.has(key)) continue; seen.add(key);
+    const [x1, y1] = pos[v], [x2, y2] = pos[w], d = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / d, uy = (y2 - y1) / d, r = 19;
+    const now = st.now && ((st.now[0] === v && st.now[1] === w) || (!g.directed && st.now[0] === w && st.now[1] === v));
+    const cls = now ? 'now' : treeEdge(v, w) ? 'tree' : '';
+    e += `<line class="edge ${cls}" x1="${(x1 + ux * r).toFixed(1)}" y1="${(y1 + uy * r).toFixed(1)}" x2="${(x2 - ux * (r + (g.directed ? 3 : 0))).toFixed(1)}" y2="${(y2 - uy * (r + (g.directed ? 3 : 0))).toFixed(1)}" ${g.directed ? 'marker-end="url(#arr)"' : ''}/>`;
+  }
+  for (let v = 0; v < g.V; v++) {
+    const [x, y] = pos[v];
+    let cls = '';
+    if (st.done && st.done.has(v)) cls = 'done';
+    else if (st.queued && st.queued.has(v)) cls = 'queued';
+    else if (st.marked && st.marked.has(v)) cls = 'marked';
+    if (st.path && st.path.has(v)) cls = 'path';
+    if (st.cur === v) cls = 'cur';
+    n += `<circle class="vx ${cls}" cx="${x}" cy="${y}" r="17"/><text class="t" x="${x}" y="${y + 5}" text-anchor="middle">${v}</text>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="graph"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="fill:var(--soft)"/></marker></defs>${e}${n}</svg>`;
+}
+function adjHTML(g, cur, idx, hide) {
+  return `<div><div class="lbl">adjacency lists (read left → right)</div><div class="adj">${range(g.V).map(v => `<div class="${v === cur ? 'cur' : ''}"><b>${v}:</b> ${g.adj[v].map((w, j) => v === cur && idx != null ? (j === idx && !hide ? `<span class="ptr">${w}</span>` : j < idx ? `<span class="seen">${w}</span>` : w) : w).join(' ')}</div>`).join('')}</div></div>`;
+}
+function edgeToHTML(V, edgeTo, reached, src, hlv, hidev) {
+  const cells = range(V).map(v => v === hidev ? '?' : v === src ? '—' : reached.has(v) ? edgeTo[v] : '');
+  const hl = {}; if (hlv != null) hl[hlv] = 'new';
+  return arrHTML(cells, { label: 'edgeTo[ ]  ("I got to v from …")', hl });
+}
+
+// ============================================================== hashing simulators
+function scRun(m, hc, puts, intro) {
+  const r = new Run(), chains = range(m).map(() => []);
+  const keys = [...new Set(puts.map(p => p[0]))];
+  const vis = o => `<div class="row">${chainsHTML(chains, o)}${hcHTML(hc, keys, o && o.k)}</div>`;
+  r.show(vis(), intro || `Separate chaining with <b>m = ${m}</b> lists. Every put does: slot = hashCode % ${m}, then looks in that one list.`, 0);
+  for (const [k, v] of puts) {
+    const i = hc[k] % m;
+    r.ask(vis({ k }), `put(${k}, ${v}): hashCode is ${hc[k]}. Which list does it go to?`, i, { num: true, line: 1, why: `${hc[k]} % ${m} = ${i}` });
+    const ch = chains[i], hit = ch.find(p => p[0] === k);
+    if (hit) {
+      r.ask(vis({ list: i, k }), `${k} is already in list ${i}. What happens?`, 'Only its value changes', { options: ['New node at the front', 'Only its value changes', 'New node at the back'], line: 6, why: 'Same key → SequentialSearchST.put just replaces the value. No new node, n does not change.' });
+      hit[1] = v;
+      r.show(vis({ list: i, key: k, upd: true, k }), `${k}'s value becomes <span class="hi">${v}</span>. Still ${chains.reduce((a, c) => a + c.length, 0)} keys total.`, 6);
+    } else {
+      ch.unshift([k, v]);
+      r.show(vis({ list: i, key: k, k }), `New key → new node at the <span class="hi">front</span> of list ${i}.`, 6);
+    }
+  }
+  const n = chains.reduce((a, c) => a + c.length, 0), avg = n / m, longest = Math.max(...chains.map(c => c.length));
+  r.ask(vis(), `Average list length? (n / m)`, avg, { num: true, why: `n = ${n} keys (repeats count once), m = ${m} → ${n}/${m} = ${avg}` });
+  r.ask(vis(), `How long is the longest list?`, longest, { num: true, why: `List ${chains.findIndex(c => c.length === longest)} has ${longest} nodes.` });
+  return r;
+}
+
+class LPT {
+  constructor(m, hc) { this.m = m; this.hc = hc; this.keys = Array(m).fill(null); this.n = 0; }
+  home(k) { return this.hc[k] % this.m; }
+  probe(k) { let i = this.home(k); const path = []; while (this.keys[i] != null && this.keys[i] !== k) { path.push(i); i = (i + 1) % this.m; } return [i, path]; }
+  place(k) { const [i] = this.probe(k); if (this.keys[i] == null) this.n++; this.keys[i] = k; return i; }
+}
+function lpPutRun(m, hc, start, newKey, intro) {
+  const r = new Run(); const t = new LPT(m, hc); start.forEach((k, i) => { t.keys[i] = k; if (k != null) t.n++; });
+  const allKeys = [...start.filter(k => k != null), newKey];
+  const vis = (o = {}) => `<div class="row">${arrHTML(t.keys, { hl: o.hl, label: o.label || `keys[ ]   m = ${t.m}, n = ${t.n}` })}${o.extra || ''}</div><div class="row">${hcHTML(hc, allKeys, o.k)}</div>`;
+  r.show(vis(), intro || `Linear probing table, <b>m = ${m}</b>. We will <b>put(${newKey})</b>. hashCode(${newKey}) = ${hc[newKey]}.`, 0);
+  const half = Math.floor(t.m / 2), big = t.n >= half;
+  r.ask(vis({ k: newKey }), `Step 1 always: is n ≥ m/2?  (n = ${t.n}, m/2 = ${t.m}/2 = ${half})`, big ? 'Yes: resize first' : 'No: no resize', { options: ['Yes: resize first', 'No: no resize'], line: 1, why: `${t.n} ≥ ${half} is ${big}. ${big ? `So the table doubles to ${2 * t.m} BEFORE ${newKey} goes in.` : 'Go straight to placing the key.'}` });
+  if (big) {
+    const old = t.keys.slice(), om = t.m, nt = new LPT(2 * om, hc);
+    const vis2 = (o = {}) => `<div class="row">${arrHTML(old, { label: `OLD table (m = ${om})`, hl: o.ohl })}</div><div class="row">${arrHTML(nt.keys, { label: `NEW table (m = ${nt.m})`, hl: o.hl })}</div><div class="row">${hcHTML(hc, allKeys, o.k)}</div>`;
+    r.show(vis2(), `<b>resize(${2 * om})</b>: make an empty ${2 * om}-slot table. Walk the OLD table from slot 0 to ${om - 1}, and re-put each key using the <span class="hi">new m = ${2 * om}</span>.`, 1);
+    for (let i = 0; i < om; i++) if (old[i] != null) {
+      const k = old[i], [slot, path] = nt.probe(k);
+      r.ask(vis2({ ohl: { [i]: 'probe' }, k }), `Old slot ${i} has ${k} (hashCode ${hc[k]}). Which slot does it land in, in the NEW table?`, slot, { num: true, why: `${hc[k]} % ${nt.m} = ${nt.home(k)}${path.length ? `, but ${path.map(p => `slot ${p} is taken`).join(', ')}, so → ${slot}` : ''}.` });
+      nt.place(k);
+      r.show(vis2({ ohl: { [i]: 'dim' }, hl: { [slot]: 'new' }, k }), `${k} → new slot <span class="hi">${slot}</span>.`, 1);
+    }
+    t.m = nt.m; t.keys = nt.keys; t.n = nt.n;
+    r.show(vis({ label: `table after resize: m = ${t.m}, n = ${t.n}` }), `The old table is thrown away. <b>Now</b> we place ${newKey}.`, 2);
+  }
+  const [slot, path] = t.probe(newKey), hl = {};
+  path.forEach(p => hl[p] = 'probe'); hl[t.home(newKey)] = (hl[t.home(newKey)] || '') + ' home';
+  r.ask(vis({ k: newKey }), `put(${newKey}): hashCode ${hc[newKey]}, m = ${t.m}. Which slot does ${newKey} end up in?`, slot, { num: true, line: 3, why: `Home = ${hc[newKey]} % ${t.m} = ${t.home(newKey)}.${path.length ? ' ' + path.map(p => `Slot ${p} has ${t.keys[p]}`).join(', ') + ` → walk right${path.some((p, j) => j && p < path[j - 1]) || slot < t.home(newKey) ? ' (wrapping around to 0)' : ''} to slot ${slot}.` : ' It is empty, so it goes right there.'}` });
+  t.place(newKey); hl[slot] = 'new';
+  r.show(vis({ hl, k: newKey }), `Done: ${newKey} is in slot <span class="hi">${slot}</span>. n = ${t.n}.`, 5);
+  return r;
+}
+function lpDelRun(m, hc, start, delKey, intro) {
+  const r = new Run(); const t = new LPT(m, hc); start.forEach((k, i) => { t.keys[i] = k; if (k != null) t.n++; });
+  const keysShown = start.filter(k => k != null);
+  const vis = (o = {}) => `<div class="row">${arrHTML(t.keys, { hl: o.hl, label: `keys[ ]   m = ${t.m}, n = ${t.n}` })}</div><div class="row">${hcHTML(hc, keysShown, o.k)}</div>`;
+  r.show(vis(), intro || `We will <b>delete(${delKey})</b>. Watch the keys after it: they must be re-put so get() never hits a fake "empty" gap.`, 0);
+  let i = t.keys.indexOf(delKey);
+  t.keys[i] = null;
+  r.show(vis({ hl: { [i]: 'gone' } }), `${delKey} was in slot ${i}. Set slot ${i} to <b>null</b>. Now check the slots right after it.`, 3);
+  i = (i + 1) % t.m;
+  while (t.keys[i] != null) {
+    const k = t.keys[i]; t.keys[i] = null; t.n--;
+    const [slot] = t.probe(k);
+    r.ask(vis({ hl: { [i]: 'probe' }, k }), `Slot ${i} has ${k} (home ${hc[k]} % ${t.m} = ${t.home(k)}). Take it out and put it back. Which slot does it land in?`, slot, { num: true, line: 7, why: `Start at home slot ${t.home(k)} and take the first empty slot: ${slot}.${slot === i ? ' Same place as before.' : ` It slid back (slot ${i} is now empty).`}` });
+    t.place(k);
+    r.show(vis({ hl: { [slot]: 'new' }, k }), `${k} → slot <span class="hi">${slot}</span>.`, 7);
+    i = (i + 1) % t.m;
+  }
+  t.n--;
+  r.show(vis(), `Slot ${i} is empty, so the cluster is over: stop. n-- → n = ${t.n}.`, 9);
+  const shrink = t.n > 0 && t.n <= Math.floor(t.m / 8);
+  r.ask(vis(), `Last check: n ≤ m/8?  (n = ${t.n}, m/8 = ${Math.floor(t.m / 8)})`, shrink ? 'Yes: shrink to m/2' : 'No: done', { options: ['Yes: shrink to m/2', 'No: done'], line: 10, why: `${t.n} ≤ ${Math.floor(t.m / 8)} is ${shrink}.` });
+  return r;
+}
+
+// ============================================================== graph simulators
+function mkGraph(adj, directed, pos, W = 520, H = 280) {
+  const V = Object.keys(adj).length;
+  return { V, adj: range(V).map(v => adj[v]), directed, W, H, pos: pos || circlePos(V, W, H) };
+}
+function dfsRun(g, s, intro) {
+  const r = new Run(), marked = new Set(), edgeTo = {}, order = [], stack = [];
+  const vis = (o = {}) => `<div class="row">${graphSVG(g, { marked, edgeTo, reached: marked, cur: o.cur, now: o.now })}</div>
+    <div class="row">${adjHTML(g, o.cur, o.idx, o.hide)}<div><div class="lbl">call stack</div><div class="stack">${stack.map(v => `<div>dfs(${v})</div>`).join('')}</div></div><div><div class="lbl">marked order</div><div class="order">${order.join(' ') || '—'}</div></div></div>
+    <div class="row">${edgeToHTML(g.V, edgeTo, marked, s, o.hlv, o.hidev)}</div>`;
+  r.show(vis(), intro || `<b>dfs(${s})</b>: go as deep as you can. Mark a vertex when you <b>arrive</b>. Read its list left to right; the first unmarked neighbor, go there <b>right now</b>.`, 0);
+  function go(v, from) {
+    marked.add(v); order.push(v); stack.push(v); if (from != null) edgeTo[v] = from;
+    r.show(vis({ cur: v, hlv: from != null ? v : null }), from == null ? `Arrive at ${v}: mark it.` : `Arrive at ${v}: mark it, and edgeTo[${v}] = <span class="hi">${from}</span>.`, from == null ? 1 : 4);
+    g.adj[v].forEach((w, j) => {
+      if (marked.has(w)) { r.show(vis({ cur: v, idx: j }), `Reading ${v}'s list: <b>${w}</b> is already marked → skip.`, 3); return; }
+      r.ask(vis({ cur: v, idx: j, hide: true }), `Still reading ${v}'s list. Which vertex gets marked next?`, w, { num: true, line: 3, why: `${w} is the next one in ${v}'s list that isn't marked yet.` });
+      r.show(vis({ cur: v, idx: j, now: [v, w] }), `${w} is unmarked → call <b>dfs(${w})</b>. ${v} waits on the stack.`, 5);
+      go(w, v);
+      r.show(vis({ cur: v, idx: j }), `Back in dfs(${v}). Keep reading ${v}'s list after ${w}.`, 2);
+    });
+    stack.pop();
+    r.show(vis({ cur: stack[stack.length - 1] }), `${v}'s list is used up → dfs(${v}) is <b>done</b>.${stack.length ? ` Return to ${stack[stack.length - 1]}.` : ' The search is over.'}`, 7);
+  }
+  go(s, null);
+  const reached = order.filter(v => v !== s);
+  if (reached.length) { const x = pick(reached); r.ask(vis({ hidev: x }), `Check yourself: what is edgeTo[${x}]?`, edgeTo[x], { num: true, why: `${x} was first reached from ${edgeTo[x]}.` }); }
+  r.show(vis(), `Marked order: <span class="hi">${order.join(' ')}</span>. Never reached: ${range(g.V).filter(v => !marked.has(v)).join(' ') || 'none'} (their edgeTo stays at Java's default 0).`, null);
+  return r;
+}
+function bfsRun(g, s, target, intro, extra) {
+  const r = new Run(), marked = new Set([s]), edgeTo = {}, dist = { [s]: 0 }, q = [s], order = [s];
+  const vis = (o = {}) => `<div class="row">${graphSVG(g, { marked, queued: new Set(q), edgeTo, reached: marked, cur: o.cur, now: o.now, path: o.path })}</div>
+    <div class="row">${adjHTML(g, o.cur, o.idx)}<div><div class="lbl">queue (front → back)</div><div class="queue"><span class="end">out ←</span>${q.map(v => `<div class="${o.fresh && o.fresh.includes(v) ? 'new' : ''}">${v}</div>`).join('')}<span class="end">← in</span></div><div class="lbl" style="margin-top:8px">marked order</div><div class="order">${order.join(' ')}</div></div></div>
+    <div class="row">${edgeToHTML(g.V, edgeTo, marked, s)}</div>`;
+  r.show(vis({ cur: s }), intro || `<b>bfs(${s})</b>: a ripple. Mark ${s} and put it in the queue. A vertex is marked the moment it <b>joins the queue</b>.`, 4);
+  while (q.length) {
+    const v = q.shift();
+    r.show(vis({ cur: v }), `Dequeue <b>${v}</b> (from the front). Now read ${v}'s list: ${g.adj[v].join(' ') || '(empty)'}.`, 6);
+    const fresh = g.adj[v].filter(w => !marked.has(w));
+    r.ask(vis({ cur: v }), `Which of ${v}'s neighbors are NEW (not marked)? Type them in list order, or "none".`, fresh.length ? fresh.join(' ') : 'none', { line: 8, why: fresh.length ? `${fresh.join(', ')} ${fresh.length > 1 ? 'are' : 'is'} unmarked; the others are already marked.` : `Every neighbor of ${v} is already marked.` });
+    for (const w of fresh) { marked.add(w); edgeTo[w] = v; dist[w] = dist[v] + 1; q.push(w); order.push(w); }
+    r.show(vis({ cur: v, fresh }), fresh.length ? `Mark ${fresh.join(', ')}; edgeTo = ${v} for each; they join the <b>back</b> of the queue.` : `Nothing new.`, 10);
+  }
+  r.show(vis(), `Queue empty → done. Marked order: <span class="hi">${order.join(' ')}</span>.`, null);
+  if (target === -1) { const c = order.filter(v => v !== s && dist[v] >= 2); target = c.length ? pick(c) : order[order.length - 1]; }
+  if (target != null && marked.has(target) && target !== s) {
+    const p = [target]; while (p[p.length - 1] !== s) p.push(edgeTo[p[p.length - 1]]); p.reverse();
+    r.ask(vis(), `Shortest path from ${s} to ${target}? (Start at ${target}, follow edgeTo back to ${s}, then flip it.)`, p.join(' '), { why: `${[...p].reverse().join(' ← ')} … flipped: ${p.join(' → ')} (${p.length - 1} edges).` });
+    r.show(vis({ path: new Set(p) }), `Path ${s} → ${target}: <span class="hi">${p.join(' → ')}</span>. BFS paths are always the fewest edges.`, null);
+  }
+  if (extra) extra(r);
+  return r;
+}
+function topoRun(g, intro) {
+  const r = new Run(), marked = new Set(), done = new Set(), post = [], stack = [];
+  const vis = (o = {}) => `<div class="row">${graphSVG(g, { marked, done, cur: o.cur })}</div>
+    <div class="row">${adjHTML(g, o.cur, o.idx, o.hide)}<div><div class="lbl">call stack</div><div class="stack">${stack.map(v => `<div>dfs(${v})</div>`).join('')}</div></div><div><div class="lbl">finish order (postorder)</div><div class="order">${o.hideOrd ? '?' : post.join(' ') || '—'}</div><div class="lbl" style="margin-top:6px">topological order = reverse</div><div class="order">${o.hideOrd ? '?' : [...post].reverse().join(' ') || '—'}</div></div></div>`;
+  r.show(vis(), intro || `Topological sort = DFS from 0, 1, 2… (skip marked ones). Write each vertex down when it <b>finishes</b>. Then read that list <b>backward</b>.`, 0);
+  function go(v) {
+    marked.add(v); stack.push(v);
+    r.show(vis({ cur: v }), `dfs(${v}): mark ${v}. Its arrows go to: ${g.adj[v].join(' ') || '(none)'}.`, 2);
+    g.adj[v].forEach((w, j) => {
+      if (marked.has(w)) { r.show(vis({ cur: v, idx: j }), `${w} already marked, skip.`, 3); return; }
+      r.ask(vis({ cur: v, idx: j, hide: true }), `Reading ${v}'s arrows. Which vertex does dfs visit next?`, w, { num: true, line: 3, why: `${w} is the next unmarked vertex in ${v}'s list.` });
+      go(w);
+    });
+    stack.pop(); done.add(v); post.push(v);
+    r.show(vis({ cur: stack[stack.length - 1] }), `${v} has nothing unmarked left → ${v} <b>finishes</b>. Postorder: <span class="hi">${post.join(' ')}</span>.`, 4);
+  }
+  for (let v = 0; v < g.V; v++) if (!marked.has(v)) { r.show(vis(), `Main loop: ${v} is not marked → start dfs(${v}).`, 7); go(v); }
+  r.ask(vis({ hideOrd: true }), `Postorder (finish order)?`, post.join(' '), { why: `Each vertex is written when its dfs call ends.` });
+  r.ask(vis({ hideOrd: true }), `Topological order? (reverse the postorder)`, [...post].reverse().join(' '), { why: `Postorder ${post.join(' ')} read backward.` });
+  r.show(vis(), `Check: every arrow v→w has v <b>before</b> w in <span class="hi">${[...post].reverse().join(' ')}</span>.`, null);
+  return r;
+}
+
+// ============================================================== tree simulators
+class BN { constructor(k) { this.key = k; this.left = this.right = null; this.red = true; } }
+function bstInsert(root, k) { if (!root) return new BN(k); let x = root; for (;;) { if (k < x.key) { if (!x.left) { x.left = new BN(k); break; } x = x.left; } else if (k > x.key) { if (!x.right) { x.right = new BN(k); break; } x = x.right; } else break; } return root; }
+const pre = (x, o = []) => { if (x) { o.push(x.key); pre(x.left, o); pre(x.right, o); } return o; };
+const ino = (x, o = []) => { if (x) { ino(x.left, o); o.push(x.key); ino(x.right, o); } return o; };
+const post = (x, o = []) => { if (x) { post(x.left, o); post(x.right, o); o.push(x.key); } return o; };
+function cloneT(x) { if (!x) return null; const y = new BN(x.key); y.red = x.red; y.left = cloneT(x.left); y.right = cloneT(x.right); return y; }
+function minNode(x) { while (x.left) x = x.left; return x; }
+function delMin(x) { if (!x.left) return x.right; x.left = delMin(x.left); return x; }
+function bstDelete(x, k) {
+  if (!x) return null;
+  if (k < x.key) x.left = bstDelete(x.left, k); else if (k > x.key) x.right = bstDelete(x.right, k);
+  else { if (!x.right) return x.left; if (!x.left) return x.right; const t = x; x = minNode(t.right); x.right = delMin(t.right); x.left = t.left; }
+  return x;
+}
+function bstRun(keys, delKeys, intro, opts = {}) {
+  const r = new Run(); let root = null;
+  if (opts.prebuilt) { keys.forEach(k => root = bstInsert(root, k)); r.show(treeSVG(root), intro, null); }
+  else {
+    r.show(`<div class="null">(empty tree)</div>`, intro || `Build a BST by putting <b>${keys.join(', ')}</b> in that order. Smaller → left child, bigger → right child. New keys always become a leaf.`, 1);
+    keys.forEach((k, idx) => {
+      if (!root) { root = new BN(k); r.show(treeSVG(root, { hl: { [k]: 'new' } }), `put(${k}): tree is empty → ${k} is the root.`, 1); return; }
+      let x = root, par = null; const path = {}; while (x) { path[x.key] = 'path'; par = x; x = k < x.key ? x.left : x.right; }
+      const side = k < par.key ? 'left' : 'right';
+      if (idx < 4 || opts.askAll) r.ask(treeSVG(root), `put(${k}): walk down from the root. Which node becomes ${k}'s parent?`, par.key, { num: true, line: 2, why: `Path: ${pre(root).filter(z => path[z]).join(' → ')} … ${k} is ${side === 'left' ? 'smaller' : 'bigger'} than ${par.key} and that spot is empty, so it's ${par.key}'s ${side} child.` });
+      root = bstInsert(root, k);
+      r.show(treeSVG(root, { hl: { ...path, [k]: 'new' } }), `${k} becomes ${par.key}'s <b>${side} child</b>.`, 3);
+    });
+  }
+  const T = treeSVG(root);
+  r.ask(T, `Preorder? (me, left, right)`, pre(root).join(' '), { why: `Root first: ${pre(root).join(' ')}` });
+  r.ask(T, `Inorder? (left, me, right)`, ino(root).join(' '), { why: `For a BST, inorder is always sorted.` });
+  r.ask(T, `Postorder? (left, right, me)`, post(root).join(' '), { why: `The root comes last: ${post(root).join(' ')}` });
+  for (const d of delKeys) {
+    let x = root; while (x.key !== d) x = d < x.key ? x.left : x.right;
+    const kids = (x.left ? 1 : 0) + (x.right ? 1 : 0);
+    const kind = kids === 2 ? 'Two children' : kids === 1 ? 'One child' : 'Leaf';
+    r.ask(treeSVG(root, { hl: { [d]: 'cur' } }), `delete(${d}). Which case is it?`, kind, { options: ['Leaf', 'One child', 'Two children'], line: 6, why: `${d} has ${kids} child${kids === 1 ? '' : 'ren'}.` });
+    if (kids === 2) {
+      const s = minNode(x.right).key, hp = {}; let y = x.right; while (y) { hp[y.key] = 'path'; y = y.left; }
+      r.ask(treeSVG(root, { hl: { [d]: 'cur' } }), `Which key replaces ${d}? (its successor: go right once, then left all the way)`, s, { num: true, line: 7, why: `Right of ${d} is ${x.right.key}, then keep going left → ${s}.` });
+      root = bstDelete(root, d);
+      r.show(treeSVG(root, { hl: { [s]: 'new' } }), `${s} takes ${d}'s place. ${s}'s old spot gets ${s}'s right child (if any).`, 9);
+    } else {
+      root = bstDelete(root, d);
+      r.show(treeSVG(root), kids ? `${d}'s only child moves up into its spot, bringing its whole tree.` : `${d} was a leaf: just remove it.`, kids ? 5 : 5);
+    }
+  }
+  return r;
+}
+
+// 2-3
+const TN = (keys, kids = []) => ({ keys, kids });
+function t23Insert(root, k, r) {
+  const path = []; let x = root;
+  while (true) { path.push(x); if (!x.kids.length) break; let j = 0; while (j < x.keys.length && k > x.keys[j]) j++; x = x.kids[j]; }
+  const leaf = path[path.length - 1];
+  if (r) r.ask(t23SVG(root), `insert(${k}): walk down. Which leaf does ${k} join? (type its keys)`, leaf.keys.join(' '), { why: `Compare ${k} with the keys in each node and follow the matching child down to the bottom.` });
+  leaf.keys.push(k); leaf.keys.sort((a, b) => a - b);
+  if (r) r.show(t23SVG(root, { hl: new Set([leaf]) }), leaf.keys.length > 2 ? `${k} joins the leaf → <span class="hi">[${leaf.keys.join(' ')}]</span> has 3 keys: too full!` : `${k} joins the leaf → [${leaf.keys.join(' ')}]. It had room: done.`, null);
+  let i = path.length - 1;
+  while (path[i].keys.length > 2) {
+    const n = path[i], [a, mid, b] = n.keys;
+    if (r) r.ask(t23SVG(root), `[${n.keys.join(' ')}] must split. Which key moves up?`, mid, { num: true, why: `Always the middle key. ${a} and ${b} become two separate nodes.` });
+    const L = TN([a], n.kids.slice(0, 2)), Rt = TN([b], n.kids.slice(2));
+    if (i === 0) { root = TN([mid], [L, Rt]); if (r) r.show(t23SVG(root, { hl: new Set([root]) }), `The <b>root</b> split, so ${mid} becomes a new root. This is the only way a 2-3 tree gets taller.`, null); break; }
+    const p = path[i - 1], j = p.kids.indexOf(n); p.kids.splice(j, 1, L, Rt); p.keys.push(mid); p.keys.sort((x, y) => x - y);
+    if (r) r.show(t23SVG(root, { hl: new Set([p]) }), p.keys.length > 2 ? `${mid} moves up → parent is now [${p.keys.join(' ')}]: too full again.` : `${mid} moves up into the parent → [${p.keys.join(' ')}]. It had room: done.`, null);
+    i--;
+  }
+  return root;
+}
+function t23Run(root, newKeys, intro) {
+  const r = new Run();
+  r.show(t23SVG(root), intro || `A 2-3 tree. Nodes hold 1 or 2 keys. We'll insert <b>${newKeys.join(', ')}</b>. New keys always go into a <b>leaf</b>; a 3-key node splits and its middle key moves up.`, null);
+  for (const k of newKeys) root = t23Insert(root, k, r);
+  r.show(t23SVG(root), `Final tree. Every leaf is on the same level ✔`, null);
+  return r;
+}
+function t23Build(keys) { let root = TN([keys[0]]); keys.slice(1).forEach(k => root = t23Insert(root, k, null)); return root; }
+const t23spec = s => Array.isArray(s[0]) ? TN(s[0], s[1].map(t23spec)) : TN(s);
+
+// LLRB
+const isRed = x => !!x && x.red;
+function rotL(h) { const x = h.right; h.right = x.left; x.left = h; x.red = h.red; h.red = true; return x; }
+function rotR(h) { const x = h.left; h.left = x.right; x.right = h; x.red = h.red; h.red = true; return x; }
+function flip(h) { h.red = !h.red; h.left.red = !h.left.red; h.right.red = !h.right.red; }
+const OPS = ['Rotate left', 'Rotate right', 'Flip colors', 'Nothing more here'];
+function llrbPut(root, k, r) {
+  const T = (hl) => treeSVG(root, { llrb: true, hl });
+  if (!root) { root = new BN(k); root.red = false; if (r) r.show(T({ [k]: 'new' }), `${k} is the first key: it's the root (roots are black).`, null); return root; }
+  const path = []; let x = root;
+  while (x) { path.push(x); if (k === x.key) return root; x = k < x.key ? x.left : x.right; }
+  const par = path[path.length - 1], nn = new BN(k);
+  if (k < par.key) par.left = nn; else par.right = nn;
+  if (r) r.show(T({ [k]: 'new' }), `put(${k}): walk down and add ${k} as a <b>red</b> leaf (new nodes are always red). Now fix things <b>on the way back up</b>.`, 1);
+  for (let i = path.length - 1; i >= 0; i--) {
+    let h = path[i];
+    const relink = nh => { if (i === 0) root = nh; else { const p = path[i - 1]; if (p.left === h) p.left = nh; else p.right = nh; } h = nh; path[i] = nh; };
+    const ops = [];
+    if (isRed(h.right) && !isRed(h.left)) ops.push(0);
+    const doOp = (op) => {
+      if (r) r.ask(T({ [h.key]: 'cur' }), `At node ${h.key}: what happens next?`, OPS[op], { options: OPS, line: 3 + op, why: op === 0 ? `${h.key}'s right link is red and its left isn't → rotate left.` : op === 1 ? `${h.key}'s left link is red AND its left child's left link is red (two reds in a row) → rotate right.` : `Both of ${h.key}'s children are red → flip colors.` });
+      if (op === 0) relink(rotL(h)); else if (op === 1) relink(rotR(h)); else flip(h);
+      if (r) r.show(T({ [h.key]: 'new' }), op === 2 ? `Flip: ${h.left.key} and ${h.right.key} turn black, ${h.key} turns red (like a 2-3 split: ${h.key} moves up).` : `Rotated. ${h.key} moves up and takes the old parent's color; the old parent becomes red.`, 3 + op);
+    };
+    if (isRed(h.right) && !isRed(h.left)) doOp(0);
+    if (isRed(h.left) && isRed(h.left.left)) doOp(1);
+    if (isRed(h.left) && isRed(h.right)) doOp(2);
+    if (r) r.ask(T({ [h.key]: 'cur' }), `At node ${h.key}: what happens next?`, OPS[3], { options: OPS, line: 6, why: `None of the three checks is true at ${h.key}, so move up.` });
+  }
+  if (root.red) { root.red = false; if (r) r.show(T(), `Last line: the root is always colored black.`, 7); }
+  return root;
+}
+function llrbRun(start, newKeys, intro) {
+  const r = new Run(); let root = start;
+  r.show(treeSVG(root, { llrb: true }), intro || `A left-leaning red-black tree (red line = red link). We'll put <b>${newKeys.join(', ')}</b>. Fix-ups run bottom-up, in code order: rotate left, rotate right, flip.`, null);
+  for (const k of newKeys) root = llrbPut(root, k, r);
+  r.show(treeSVG(root, { llrb: true }), `Final tree. No red right links, no two reds in a row ✔`, null);
+  return r;
+}
+function llrbBuild(keys) { let root = null; keys.forEach(k => root = llrbPut(root, k, null)); return root; }
+
+// rank
+function rankRun(keys, key, intro) {
+  const r = new Run(); let lo = 0, hi = keys.length - 1;
+  const vis = (o = {}) => { const hl = {}; for (let i = 0; i < keys.length; i++) if (i < lo || i > hi) hl[i] = 'dim'; if (o.mid != null) hl[o.mid] = 'new'; return `<div class="row">${arrHTML(keys, { hl, label: `keys[ ]  looking for ${key}` })}</div><div class="row"><table class="mini"><tr><th>lo</th><th>hi</th></tr><tr><td>${lo}</td><td>${hi}</td></tr></table></div>`; };
+  r.show(vis(), intro || `<b>rank(${key})</b> = how many keys are smaller than ${key}. Binary search: look in the middle, throw away the half it can't be in.`, 0);
+  let ans = null;
+  while (lo <= hi) {
+    const mid = lo + Math.floor((hi - lo) / 2);
+    r.ask(vis(), `lo = ${lo}, hi = ${hi}. What is mid?`, mid, { num: true, line: 3, why: `${lo} + (${hi} − ${lo}) / 2 = ${lo} + ${Math.floor((hi - lo) / 2)} = ${mid} (round down).` });
+    const c = key < keys[mid] ? 'Go left (hi = mid − 1)' : key > keys[mid] ? 'Go right (lo = mid + 1)' : 'Found it (return mid)';
+    r.ask(vis({ mid }), `keys[${mid}] = ${keys[mid]}. Compare with ${key}. Then?`, c, { options: ['Go left (hi = mid − 1)', 'Go right (lo = mid + 1)', 'Found it (return mid)'], line: 5, why: `${key} ${key < keys[mid] ? '<' : key > keys[mid] ? '>' : '='} ${keys[mid]}.` });
+    if (key < keys[mid]) hi = mid - 1; else if (key > keys[mid]) lo = mid + 1; else { ans = mid; break; }
+  }
+  if (ans == null) { ans = lo; r.show(vis(), `lo (${lo}) > hi (${hi}) → loop ends. ${key} is not in the array.`, 9); }
+  r.ask(vis(), `So what does rank(${key}) return?`, ans, { num: true, line: 9, why: `${ans} keys are smaller than ${key}${keys.includes(key) ? '' : ' (when not found, return lo)'}.` });
+  if (!keys.includes(key)) {
+    r.ask(vis(), `floor(${key}) = the biggest key ≤ ${key}. Which key? (or "none")`, ans > 0 ? keys[ans - 1] : 'none', { why: ans > 0 ? `keys[rank − 1] = keys[${ans - 1}] = ${keys[ans - 1]}` : 'Nothing is smaller.' });
+  }
+  return r;
+}
+
+// SequentialSearchST
+function listRun(puts, intro) {
+  const r = new Run(), list = [];
+  r.show(listHTML(list), intro || `SequentialSearchST: an unordered linked list. put walks the list looking for the key. Found → change the value. Not found → <b>new node at the front</b>.`, 0);
+  for (const [k, v] of puts) {
+    const hit = list.find(p => p[0] === k);
+    r.ask(listHTML(list), `put(${k}, ${v}). What happens?`, hit ? 'Only its value changes' : 'New node at the front', { options: ['New node at the front', 'Only its value changes', 'New node at the back'], line: hit ? 2 : 3, why: hit ? `${k} is already in the list.` : `${k} isn't in the list yet.` });
+    if (hit) { hit[1] = v; r.show(listHTML(list, { key: k, upd: true }), `${k}'s value becomes ${v}.`, 2); }
+    else { list.unshift([k, v]); r.show(listHTML(list, { key: k }), `New node ${k} at the front. first now points to it.`, 3); }
+  }
+  r.ask(listHTML(list), `List the keys from first to last.`, list.map(p => p[0]).join(' '), { why: `Newest key first: ${list.map(p => p[0]).join(' → ')}` });
+  return r;
+}
+
+// ============================================================== random generators
+const LET = 'ABCDEFGHJKLMNPRSTUWXYZ'.split('');
+function genSC() {
+  const m = 4, ks = shuffle(LET).slice(0, 5), hc = {}; ks.forEach(k => hc[k] = 1 + R(48));
+  const puts = ks.map((k, i) => [k, i + 1]); const rep = pick(ks.slice(0, 3)); puts.splice(3 + R(3), 0, [rep, 9]);
+  return scRun(m, hc, puts);
+}
+function genLPPut() {
+  const m = pick([5, 8, 8, 10]), half = Math.floor(m / 2), n0 = Math.random() < .5 ? half : 1 + R(Math.max(1, half - 1));
+  const ks = shuffle(LET).slice(0, n0 + 1), hc = {}, t = new LPT(m, hc);
+  const base = R(m);
+  ks.forEach((k, i) => { const home = Math.random() < .6 ? (base + R(2)) % m : R(m); hc[k] = home + m * (1 + R(4)); });
+  ks.slice(0, n0).forEach(k => t.place(k));
+  const nk = ks[n0]; if (Math.random() < .7) { const occ = range(m).filter(i => t.keys[i] != null); hc[nk] = pick(occ) + m * (1 + R(4)); }
+  return lpPutRun(m, hc, t.keys.slice(), nk);
+}
+function genLPDel() {
+  for (let tries = 0; tries < 50; tries++) {
+    const m = 10, ks = shuffle(LET).slice(0, 4), hc = {}, t = new LPT(m, hc), base = R(m);
+    ks.forEach(k => { hc[k] = ((base + R(3)) % m) + m * (1 + R(5)); });
+    ks.forEach(k => t.place(k));
+    const cands = ks.filter(k => t.keys[(t.keys.indexOf(k) + 1) % m] != null);
+    if (!cands.length) continue;
+    return lpDelRun(m, hc, t.keys.slice(), pick(cands));
+  }
+}
+function genUGraph() {
+  const V = pick([7, 8]), edges = new Set(), order = shuffle(range(V));
+  for (let i = 1; i < V - (Math.random() < .5 ? 2 : 0); i++) { const a = order[i], b = order[R(i)]; edges.add(Math.min(a, b) + '-' + Math.max(a, b)); }
+  let extra = 2 + R(2); while (extra--) { const a = R(V), b = R(V); if (a !== b) edges.add(Math.min(a, b) + '-' + Math.max(a, b)); }
+  const adj = {}; range(V).forEach(v => adj[v] = []);
+  for (const e of edges) { const [a, b] = e.split('-').map(Number); adj[a].push(b); adj[b].push(a); }
+  range(V).forEach(v => adj[v] = shuffle(adj[v]));
+  return mkGraph(adj, false);
+}
+function genDAG() {
+  const V = 7, p = shuffle(range(V)), adj = {}; range(V).forEach(v => adj[v] = []);
+  for (let i = 0; i < V; i++) for (let j = i + 1; j < V; j++) if (Math.random() < .3) adj[p[i]].push(p[j]);
+  range(V).forEach(v => adj[v] = shuffle(adj[v]));
+  return mkGraph(adj, true);
+}
+function genBST() { const keys = distinctNums(8, 5, 95); const root = keys.reduce((r, k) => bstInsert(r, k), null); const two = []; (function w(x) { if (x) { if (x.left && x.right) two.push(x.key); w(x.left); w(x.right); } })(root); const d = two.length ? pick(two) : keys[R(keys.length)]; return bstRun(keys, [d]); }
+function gen23() { const ks = distinctNums(11, 1, 60), root = t23Build(ks.slice(0, 8)); return t23Run(root, ks.slice(8)); }
+function genLLRB() { const ks = distinctNums(8, 1, 60); return llrbRun(llrbBuild(ks.slice(0, 6)), ks.slice(6)); }
+function genRank() { const keys = distinctNums(8, 1, 60).sort((a, b) => a - b); const key = Math.random() < .35 ? pick(keys) : (() => { let k; do k = 1 + R(62); while (keys.includes(k)); return k; })(); return rankRun(keys, key); }
+function genList() { const ks = shuffle(['S', 'E', 'A', 'R', 'C', 'H']).slice(0, 4); const puts = []; for (let i = 0; i < 6; i++) puts.push([i < 4 ? ks[i] : pick(ks), i]); return listRun(puts); }
+
+// ============================================================== worked example presets
+const GA = mkGraph({ 0: [4, 5], 1: [6], 2: [3, 6], 3: [7, 2, 6], 4: [0, 5], 5: [0, 4], 6: [2, 3, 1], 7: [3] }, false,
+  { 0: [40, 50], 4: [40, 190], 5: [140, 120], 6: [270, 120], 1: [270, 225], 2: [380, 40], 3: [470, 120], 7: [570, 120] }, 610, 260);
+const GB = mkGraph({ 0: [2, 3], 1: [4, 3], 2: [4, 7, 0], 3: [1, 7, 0], 4: [2, 1, 7], 5: [8, 6], 6: [5], 7: [4, 2, 3], 8: [5] }, false,
+  { 3: [40, 130], 1: [170, 40], 7: [170, 135], 0: [170, 225], 4: [310, 40], 2: [310, 200], 5: [440, 60], 8: [560, 60], 6: [440, 190] }, 600, 260);
+const GP = mkGraph({ 0: [2], 1: [7, 0, 2], 2: [], 3: [7], 4: [8, 6], 5: [3, 1], 6: [], 7: [2], 8: [], 9: [8, 4] }, true,
+  { 5: [40, 70], 3: [160, 35], 1: [160, 150], 7: [280, 70], 0: [280, 200], 2: [400, 135], 9: [500, 40], 4: [500, 170], 8: [610, 40], 6: [610, 170] }, 650, 240);
+const LL22 = (() => { const N = (k, l, r, red) => { const n = new BN(k); n.left = l || null; n.right = r || null; n.red = !!red; return n; };
+  return N(100, N(40, N(20, N(10), N(35, N(25, 0, 0, true)), true), N(50)), N(150, N(125, N(110, 0, 0, true)), N(175))); })();
+const PRESETS = {
+  list: [{ name: 'Book example: S E A R C H E', gen: () => listRun([['S', 0], ['E', 1], ['A', 2], ['R', 3], ['C', 4], ['H', 5], ['E', 6]]) }],
+  rank: [{ name: 'rank(5) on −2 0 1 4 7 9 12', gen: () => rankRun([-2, 0, 1, 4, 7, 9, 12], 5) }],
+  bst: [{ name: 'Example: postorder, delete(30), delete(80)', gen: () => bstRun([50, 30, 80, 20, 40, 90, 34, 47, 84, 97, 32, 37, 87], [30, 80], 'Find the postorder, then delete(30) (two children). Try it.', { prebuilt: true }) }],
+  t23: [{ name: 'Example: insert 42', gen: () => t23Run(t23spec([[50], [[[20, 40], [[8, 12], [30], [44, 48]]], [[70], [[60], [80]]]]]), [42], 'Insert 42 into this 2-3 tree.') }],
+  llrb: [{ name: 'Example: insert 22', gen: () => llrbRun(cloneT(LL22), [22], 'Insert 22 into this tree. Red line = red link.') }],
+  sc: [{ name: 'Example: Points, m = 4', gen: () => scRun(4, { '(3,4)': 7, '(1,2)': 3, '(1,1)': 2, '(4,3)': 7 }, [['(3,4)', 'A'], ['(1,2)', 'B'], ['(1,1)', 'C'], ['(3,4)', 'D'], ['(4,3)', 'E']], 'Point.hashCode() = x + y, default m = 4. Five puts, but watch the repeat.') }],
+  lpput: [{ name: 'Example: insert A (resize!)', gen: () => lpPutRun(5, { A: 13, F: 10, R: 8, X: 19 }, ['F', null, null, 'R', 'X'], 'A', 'This 5-slot table holds F, R, X. Insert A (hashCode 13). Check the resize rule first.') },
+    { name: 'Example: where does Z go?', gen: () => lpPutRun(8, { B: 8, C: 13, L: 15, Z: 7 }, ['B', null, null, null, null, 'C', null, 'L'], 'Z', 'Insert Z (hashCode 7) into this 8-slot table.') }],
+  lpdel: [{ name: 'Example: delete E', gen: () => lpDelRun(10, { E: 22, L: 62, P: 35, U: 12, W: 44 }, [null, null, 'U', 'E', 'W', 'L', 'P', null, null, null], 'E', 'Delete E from this table.') }],
+  dfs: [{ name: 'Example: dfs(g, 6)', gen: () => dfsRun(GA, 6, 'dfs(g, 6). Find the marked order and edgeTo.') }],
+  bfs: [{ name: 'Example: bfs(g, 3) + path', gen: () => bfsRun(GB, 3, null, 'bfs(g, 3). Find the marked order and edgeTo.', r => {
+    const e = { 0: 4, 1: 5, 2: 0, 3: 7, 4: 3, 5: 2, 6: 2, 7: 6 };
+    r.ask(arrHTML(range(8).map(v => e[v]), { label: 'edgeTo from bfs(2) on a different graph' }), 'Shortest path from 2 to 3?', '2 6 7 3', { why: '3 ← 7 ← 6 ← 2. Flip it: 2 → 6 → 7 → 3. (edgeTo[2] = 0 is just Java\'s default for the source.)' });
+  }) }],
+  topo: [{ name: 'Example digraph', gen: () => topoRun(GP, 'Topological sort of this digraph.') }],
+};
+
+// ============================================================== topics
+const T = [
+  { id: 'list', group: 'Lists + arrays', name: 'Linked list (SequentialSearchST)', src: 'Sedgewick 3.1', gen: genList,
+    idea: `A linked list is a <b>conga line</b>. Each node holds a key, a value, and an arrow to the next node. <code>first</code> points at the front. SequentialSearchST puts <b>new keys at the front</b>.`,
+    rules: ['Key already there → only its value changes.', 'New key → new node at the front.', 'Objects are arrows. Two arrows to one object = aliasing.', 'Recursion: base case for null, trust the call on x.next, helper returns the new front.'],
+    traps: 'adding at the back · making a second node for a repeated key',
+    code: ['public void put(Key key, Value val) {', '  for (Node x = first; x != null; x = x.next)', '    if (key.equals(x.key)) { x.val = val; return; }', '  first = new Node(key, val, first);', '  n++;', '}'] },
+  { id: 'rank', group: 'Lists + arrays', name: 'BinarySearchST rank', src: 'Sedgewick 3.1', gen: genRank,
+    idea: `Keys sit in a <b>sorted array</b>. Like a phone book: open it in the <b>middle</b>, then throw away the half it can't be in. <b>rank(key)</b> = how many keys are smaller.`,
+    rules: ['mid = lo + (hi − lo) / 2, rounded down.', 'Smaller → hi = mid − 1. Bigger → lo = mid + 1.', 'Loop while lo ≤ hi. Not found → return lo.', 'floor = keys[rank − 1], ceiling = keys[rank] (when the key is missing).'],
+    traps: 'rounding mid up · stopping when lo == hi (there is one more step)',
+    code: ['public int rank(Key key) {', '  int lo = 0, hi = n - 1;', '  while (lo <= hi) {', '    int mid = lo + (hi - lo) / 2;', '    int cmp = key.compareTo(keys[mid]);', '    if      (cmp < 0) hi = mid - 1;', '    else if (cmp > 0) lo = mid + 1;', '    else return mid;', '  }', '  return lo;', '}'] },
+  { id: 'bst', group: 'Trees', name: 'BST: build, traverse, delete', src: 'Sedgewick 3.2', gen: genBST,
+    idea: `A BST is a <b>sorting machine</b>. At each node: smaller goes to the left child, bigger to the right child. New keys always become a new leaf at the bottom.`,
+    rules: ['Preorder: me, left, right. Inorder: left, me, right (sorted!). Postorder: left, right, me.', 'Delete a leaf → remove it. One child → the child moves up.', 'Two children → replace with the successor: right once, then left all the way.'],
+    traps: 'using the predecessor · forgetting the successor\'s right child · mixing up pre and post',
+    code: ['public void put(Key key, Value val)', '  root = put(root, key, val);', '  // go left if smaller, right if bigger', '  // null spot → new Node: a new leaf', '', '  // delete(key):', '  //   0 or 1 child → return the other child', '  //   2 children → t = x; x = min(t.right);', '  //   x.right = deleteMin(t.right);', '  //   x.left = t.left;'] },
+  { id: 't23', group: 'Trees', name: '2-3 tree insert', src: 'Sedgewick 3.3', gen: gen23,
+    idea: `Nodes hold <b>1 or 2 keys</b>. A new key squeezes into a <b>leaf</b>. If a node gets 3 keys it's too full: the <b>middle key pops up</b> to its parent, and the other two split apart.`,
+    rules: ['Always insert at a leaf.', '3 keys → split: middle up, left and right become 2-nodes.', 'The split can keep going up.', 'Only a root split makes the tree taller, so all leaves stay on one level.'],
+    traps: 'putting the key in an inner node · stopping after the first split',
+    code: [] },
+  { id: 'llrb', group: 'Trees', name: 'Red-black (LLRB) insert', src: 'Sedgewick 3.3', gen: genLLRB,
+    idea: `An LLRB is a 2-3 tree <b>drawn as a normal BST</b>. A <b>red link</b> glues two keys into one 3-node. Red links must lean <b>left</b>.`,
+    rules: ['New node = red. Root = black.', 'Going back up, at each node, in this order:', '1) right red & left black → rotate left', '2) left red & left.left red → rotate right', '3) both children red → flip colors'],
+    traps: 'doing the fix-ups in the wrong order · forgetting to keep fixing higher up · rotation colors (the one moving up takes the old color)',
+    code: ['private Node put(Node h, Key key, Value val) {', '  if (h == null) return new Node(key, val, RED, 1);', '  // ... go left / right like a BST ...', '  if (isRed(h.right) && !isRed(h.left))     h = rotateLeft(h);', '  if (isRed(h.left)  &&  isRed(h.left.left)) h = rotateRight(h);', '  if (isRed(h.left)  &&  isRed(h.right))     flipColors(h);', '  return h;', '} // put(): root.color = BLACK;'] },
+  { id: 'sc', group: 'Hashing', name: 'Separate chaining', src: 'Sedgewick 3.4', hot: true, gen: genSC,
+    idea: `A hash table is a row of <b>mailboxes</b> 0 to m−1. <b>hashCode % m</b> picks the mailbox. With separate chaining, each mailbox holds a <b>linked list</b>, so two keys in the same box just line up.`,
+    rules: ['slot = hashCode % m (m starts at 4).', 'New key → front of that list. Same key → only the value changes.', 'Average list length = n / m.', 'Equal keys must have equal hashCodes, or get() looks in the wrong box.'],
+    traps: 'counting a repeated key twice · adding at the back of the list',
+    code: ['private int hash(Key key) {', '  return (key.hashCode() & 0x7fffffff) % m; }', 'public void put(Key key, Value val) {', '  if (n >= 10*m) resize(2*m);', '  int i = hash(key);', '  if (!st[i].contains(key)) n++;', '  st[i].put(key, val);  // new key at FRONT', '}'] },
+  { id: 'lpput', group: 'Hashing', name: 'Linear probing: put + resize', src: 'Sedgewick 3.4', hot: true, gen: genLPPut,
+    idea: `One key per mailbox, no lists. If your box is taken, <b>walk right</b> to the next empty one, wrapping from the end back to 0. Like parking: your spot is taken, take the next open one.`,
+    rules: ['FIRST: if n ≥ m/2 → resize to 2m before placing anything.', 'Resize = new table; walk the old one from slot 0; re-put each key with the new m.', 'Then: start at hashCode % m, walk right until empty.'],
+    traps: 'placing the key before the resize check · re-hashing with the old m',
+    code: ['public void put(Key key, Value val) {', '  if (n >= m/2) resize(2*m);', '  int i;', '  for (i = hash(key); keys[i] != null; i = (i+1) % m)', '    if (keys[i].equals(key)) { vals[i] = val; return; }', '  keys[i] = key; vals[i] = val;', '  n++;', '}'] },
+  { id: 'lpdel', group: 'Hashing', name: 'Linear probing: delete', src: 'Sedgewick 3.4', hot: true, gen: genLPDel,
+    idea: `You can't just empty a box: get() stops at the first empty slot, so keys parked past the gap would get <b>lost</b>. After emptying it, <b>re-park every key after it</b> until you reach an empty slot.`,
+    rules: ['Find the key, set the slot to null.', 'Next slot on: take each key out and put it back, until a null slot.', 'Then n--, and shrink if n ≤ m/8.', 'Tombstone variant: keep the key, null the value; get walks past it.'],
+    traps: 're-putting only one key · going past the empty slot',
+    code: ['public void delete(Key key) {', '  if (!contains(key)) return;', '  int i = hash(key); while (!key.equals(keys[i])) i = (i+1) % m;', '  keys[i] = null; vals[i] = null;', '  i = (i + 1) % m;', '  while (keys[i] != null) {', '    Key k = keys[i]; keys[i] = null; n--;', '    put(k, vals...);  // re-put', '    i = (i + 1) % m; }', '  n--;', '  if (n > 0 && n <= m/8) resize(m/2);', '}'] },
+  { id: 'dfs', group: 'Graphs', name: 'DFS (depth-first)', src: 'Sedgewick 4.1', hot: true, gen: () => { const g = genUGraph(); return dfsRun(g, pick(range(g.V).filter(v => g.adj[v].length > 1))); },
+    idea: `DFS explores like you would a <b>maze</b>: keep going deeper, and only back up at a dead end. The recursion (call stack) remembers where to come back to.`,
+    rules: ['Mark a vertex when you ARRIVE.', 'Read its list left to right. First unmarked neighbor w → edgeTo[w] = v, go there NOW.', 'When w is done, come back and keep reading v\'s list.'],
+    traps: 'marking all neighbors at once (that\'s BFS) · forgetting to come back to finish a list',
+    code: ['private void dfs(Graph G, int v) {', '  marked[v] = true;', '  for (int w : G.adj(v)) {', '    if (!marked[w]) {', '      edgeTo[w] = v;', '      dfs(G, w);', '    }', '  }', '}'] },
+  { id: 'bfs', group: 'Graphs', name: 'BFS + shortest path', src: 'Sedgewick 4.1', hot: true, gen: () => { const g = genUGraph(); return bfsRun(g, pick(range(g.V).filter(v => g.adj[v].length > 1)), -1); },
+    idea: `BFS is a <b>ripple in a pond</b>: everything 1 step away, then 2 steps, then 3. It uses a <b>queue</b> (first in, first out), so it finds the <b>shortest</b> paths.`,
+    rules: ['Mark + edgeTo when a vertex JOINS the queue.', 'Dequeue from the front; add new neighbors to the back, in list order.', 'Marked order = queue order.', 'Path: start at the end, follow edgeTo back to the source, flip.'],
+    traps: 'marking when you dequeue · forgetting to flip the path',
+    code: ['private void bfs(Graph G, int s) {', '  Queue<Integer> q = new Queue<Integer>();', '  distTo[s] = 0;', '  marked[s] = true;', '  q.enqueue(s);', '  while (!q.isEmpty()) {', '    int v = q.dequeue();', '    for (int w : G.adj(v)) {', '      if (!marked[w]) {', '        edgeTo[w] = v; distTo[w] = distTo[v] + 1;', '        marked[w] = true; q.enqueue(w);', '      } } } }'] },
+  { id: 'topo', group: 'Graphs', name: 'Topological sort', src: 'Sedgewick 4.2', gen: () => topoRun(genDAG()),
+    idea: `Topological order = an order to <b>get dressed</b>: socks before shoes. Every arrow v→w means v must come before w. Recipe: DFS, write each vertex down when it <b>finishes</b>, then read the list backward.`,
+    rules: ['Run dfs from 0, 1, 2… skipping marked ones.', 'Postorder = the order vertices FINISH.', 'Topological order = postorder reversed.', 'Check: every arrow points forward in your answer.'],
+    traps: 'forgetting to reverse · writing vertices when they start instead of when they finish',
+    code: ['private void dfs(Digraph G, int v) {', '  marked[v] = true;', '  for (int w : G.adj(v))', '    if (!marked[w]) dfs(G, w);', '  postorder.enqueue(v);  // FINISHED', '  reversePost.push(v);   // topological order', '}', '// for (v = 0; v < V; v++) if (!marked[v]) dfs(G, v);'] },
+];
+T.find(t => t.id === 't23').code = ['// insert(k):', '//  1. walk down to the leaf where k belongs', '//  2. add k to that leaf', '//  3. while a node has 3 keys:', '//       middle key moves up into the parent', '//       the other 2 keys become 2 nodes', '//  4. root split → new root (tree grows)'];
+
+// ============================================================== progress (per viewer, optional)
+const SKEY = 'csc301-final-lab-v1';
+let prog = {}; try { prog = JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch (e) { prog = {}; }
+const saveProg = () => { try { localStorage.setItem(SKEY, JSON.stringify(prog)); } catch (e) {} };
+const pct = id => { const p = prog[id]; return p ? Math.min(100, Math.round(100 * p.right / Math.max(1, Math.max(p.asked, 20)))) : 0; };
+
+// ============================================================== player
+let S = { topic: null, run: null, i: 0, mode: 'learn', tries: 0, solved: {}, right: 0, asked: 0, auto: null, mixed: false };
+function navHTML() {
+  const groups = [...new Set(T.map(t => t.group))];
+  return `<div class="group"><button class="tbtn ${!S.topic && !S.exam ? 'on' : ''}" data-go="home">Start here</button><button class="tbtn ${S.exam ? 'on' : ''}" data-go="exam">Mock final exam <span class="tag">TIMED</span></button><button class="tbtn ${S.mixed ? 'on' : ''}" data-go="mixed">Mixed practice</button></div>` +
+    groups.map(g => `<div class="group"><span>${g}</span>${T.filter(t => t.group === g).map(t => `<button class="tbtn ${S.topic === t && !S.mixed ? 'on' : ''}" data-go="${t.id}"><span>${t.name}</span><span class="pct ${pct(t.id) >= 100 ? 'full' : ''}">${pct(t.id)}%</span></button>`).join('')}</div>`).join('');
+}
+function renderNav() { $('#nav').innerHTML = navHTML(); }
+function home() {
+  stopAuto(); stopTimer(); S.topic = null; S.mixed = false; S.exam = false; renderNav();
+  $('#main').innerHTML = `<section class="card hero"><div><h2>Learn it, watch it, then do it yourself.</h2>
+    <p>Every topic a Data Structures II final tends to ask, as hand-trace drills. Each one has a <b>Learn</b> mode (a worked example animated step by step, with the answer shown) and a <b>Practice</b> mode (a fresh random problem that stops and asks you what happens next).</p>
+    <div class="legend"><span><i class="sw" style="background:var(--marker);border-color:var(--warn)"></i>where we are now</span><span><i class="sw" style="background:var(--accent-soft);border-color:var(--accent)"></i>visited / marked</span><span><i class="sw" style="background:var(--ok-soft);border-color:var(--ok)"></i>finished</span><span><i class="sw" style="background:var(--red-soft);border-color:var(--red)"></i>removed / too full / red link</span></div></div>
+    <div class="steps3"><div><h3>1 · Read the idea</h3><small>One analogy, 3–4 rules.</small></div><div><h3>2 · Learn</h3><small>Watch the worked example. Press Next.</small></div><div><h3>3 · Practice</h3><small>Random problems. Answer each step.</small></div></div></section>
+    <section class="card"><div class="head"><div><h3>Suggested order</h3><p>Hashing and graphs first: they have the most mechanical rules to get wrong.</p></div></div>
+    <div class="tiles" style="margin-top:10px">${['sc', 'lpput', 'lpdel', 'dfs', 'bfs', 'topo', 'bst', 't23', 'llrb', 'rank', 'list'].map(id => { const t = T.find(x => x.id === id); return `<button class="tile" data-go="${id}"><small>${t.group} · ${t.src}</small><b>${t.name}</b><div class="bar"><i style="width:${pct(id)}%"></i></div><small>${pct(id)}% practiced</small></button>`; }).join('')}
+    <button class="tile" data-go="mixed"><small>All topics</small><b>Mixed practice</b><small>Random topic each round, with hints.</small></button></div></section>
+    <section class="card hero"><div><h3>Ready to test yourself?</h3><p>The <b>Mock final</b> is 11 questions, 100 points, 90 minutes, no hints until you submit. New questions every time.</p></div><div><button class="btn primary" data-go="exam">Take the mock final →</button></div></section>`;
+}
+function openTopic(id, mode) {
+  stopAuto(); stopTimer(); S.mixed = false; S.exam = false; S.topic = T.find(t => t.id === id); S.mode = mode || 'learn'; renderNav();
+  start(S.mode === 'learn' ? PRESETS[id][0].gen() : S.topic.gen());
+}
+function openMixed() {
+  stopAuto(); stopTimer(); S.mixed = true; S.exam = false; S.topic = pick(T); S.mode = 'practice'; renderNav(); start(S.topic.gen());
+}
+function start(run) { S.run = run; S.i = 0; S.tries = 0; S.solved = {}; S.right = 0; S.asked = run.frames.filter(f => f.ask).length; draw(); }
+function topicShell() {
+  const t = S.topic, presets = PRESETS[t.id];
+  return `<section class="card idea"><div><div class="head"><div><small class="cap">${t.group} · from ${t.src}</small><h2>${t.name}</h2></div></div><p class="analogy">${t.idea}</p></div>
+    <div><h3>Rules</h3><ul>${t.rules.map(r => `<li>${r}</li>`).join('')}</ul><div class="traps"><b>Traps:</b> ${t.traps}</div></div></section>
+    <div class="head"><div class="modes" role="tablist">
+      ${S.mixed ? `<span class="mode on">Mixed exam practice · ${t.name}</span>` : `${presets.map((p, j) => `<button class="mode ${S.mode === 'learn' && S.preset === j ? 'on' : ''}" data-mode="learn" data-p="${j}">Learn: ${p.name}</button>`).join('')}
+      <button class="mode ${S.mode === 'practice' ? 'on' : ''}" data-mode="practice">Practice: new random problem</button>`}</div>
+      <span class="score" id="score"></span></div>
+    <div class="bench"><section class="card stage" id="stage" aria-live="polite"></section>
+      <div class="side"><section class="card"><div class="say" id="say"></div></section><div id="ask"></div>
+        <div class="controls"><button class="btn" id="back">← Back</button><button class="btn primary" id="next">Next →</button>${S.mode === 'learn' ? '<button class="btn" id="play">▶ Play</button>' : ''}<div class="prog"><i id="bar"></i></div></div>
+        ${t.code.length ? `<pre class="code" id="code"></pre>` : ''}</div></div>`;
+}
+function draw() {
+  if (!$('#stage') || S._shellFor !== S.topic.id + S.mode + S.mixed + S.preset) { $('#main').innerHTML = topicShell(); S._shellFor = S.topic.id + S.mode + S.mixed + S.preset; }
+  const f = S.run.frames[S.i], done = S.i >= S.run.frames.length;
+  $('#bar').style.width = `${Math.round(100 * Math.min(S.i + 1, S.run.frames.length) / S.run.frames.length)}%`;
+  $('#score').textContent = S.mode === 'practice' ? `first-try correct: ${S.right} / ${S.asked}` : `step ${Math.min(S.i + 1, S.run.frames.length)} of ${S.run.frames.length}`;
+  $('#back').disabled = S.i === 0;
+  if (done) return drawDone();
+  $('#stage').innerHTML = f.vis;
+  $('#say').innerHTML = f.ask ? (f.say || `<span class="cap">Your turn.</span>`) : f.say;
+  const code = $('#code');
+  if (code) code.innerHTML = S.topic.code.map((l, j) => `<div class="${f.line === j ? 'on' : ''}">${esc(l) || ' '}</div>`).join('');
+  drawAsk(f);
+}
+function drawAsk(f) {
+  const box = $('#ask'), next = $('#next');
+  if (!f.ask) { box.innerHTML = ''; next.disabled = false; return; }
+  const a = f.ask, st = S.solved[S.i];
+  if (S.mode === 'learn') {
+    box.innerHTML = `<div class="ask"><div class="q">Think first: ${a.q}</div>${st ? `<div class="fb ok"><b>Answer: ${esc(a.answer)}</b>. ${a.why}</div>` : `<div class="row"><button class="btn" id="reveal">Show answer</button></div>`}</div>`;
+    next.disabled = false;
+    const rv = $('#reveal'); if (rv) rv.onclick = () => { S.solved[S.i] = 'seen'; drawAsk(f); };
+    return;
+  }
+  next.disabled = !st;
+  const fb = st ? `<div class="fb ${st === 'right' ? 'ok' : 'no'}">${st === 'right' ? '✔ Right.' : `Answer: <b>${esc(a.answer)}</b>.`} ${a.why}</div>` : (S.tries ? `<div class="fb no">Not quite. Try again${S.tries >= 2 ? ', or show the answer' : ''}.</div>` : '');
+  if (a.options) {
+    box.innerHTML = `<div class="ask"><div class="q">${a.q}</div><div class="row">${a.options.map(o => `<button class="choice ${st && o === a.answer ? 'right' : ''}" data-opt="${esc(o)}" ${st ? 'disabled' : ''}>${esc(o)}</button>`).join('')}</div>${fb}${!st && S.tries >= 2 ? '<button class="btn" id="giveup">Show answer</button>' : ''}</div>`;
+    box.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => check(b.dataset.opt));
+  } else {
+    box.innerHTML = `<div class="ask"><label class="q" for="ans">${a.q}</label><form class="row" id="af"><input id="ans" autocomplete="off" ${st ? 'disabled' : ''} placeholder="${a.num ? 'a number' : 'type it, e.g. 3 1 7'}"><button class="btn primary" ${st ? 'disabled' : ''}>Check</button></form>${fb}${!st && S.tries >= 2 ? '<button class="btn" id="giveup">Show answer</button>' : ''}</div>`;
+    $('#af').onsubmit = e => { e.preventDefault(); check($('#ans').value); };
+    if (!st) setTimeout(() => { const i = $('#ans'); if (i) i.focus({ preventScroll: true }); }, 0);
+  }
+  const g = $('#giveup'); if (g) g.onclick = () => { S.solved[S.i] = 'shown'; record(false); drawAsk(f); };
+}
+function isRight(a, given) {
+  if (a.options) return given === a.answer;
+  if (a.num) return Math.abs(parseFloat(given) - parseFloat(a.answer)) < 1e-9;
+  return tokens(given).join(' ') === tokens(a.answer).join(' ');
+}
+function record(ok) {
+  const id = S.topic.id; prog[id] = prog[id] || { right: 0, asked: 0 }; prog[id].asked++; if (ok) prog[id].right++; saveProg(); renderNav();
+}
+function check(given) {
+  const f = S.run.frames[S.i], a = f.ask;
+  if (S.solved[S.i]) return;
+  if (!String(given).trim()) return;
+  if (isRight(a, given)) { S.solved[S.i] = 'right'; if (S.tries === 0) S.right++; record(S.tries === 0); }
+  else { S.tries++; }
+  drawAsk(f); $('#score').textContent = `first-try correct: ${S.right} / ${S.asked}`;
+  if (S.solved[S.i]) $('#next').focus({ preventScroll: true });
+}
+function go(d) {
+  if (d > 0 && $('#next').disabled) return;
+  S.i = Math.max(0, Math.min(S.run.frames.length, S.i + d)); S.tries = 0; draw();
+}
+function drawDone() {
+  stopAuto();
+  $('#stage').innerHTML = `<div class="done-card">${S.mode === 'practice' ? `<div class="big">${S.right} / ${S.asked}</div><div>right on the first try</div>` : `<div class="big">Done</div><div>You watched the whole problem. Now try a fresh one yourself.</div>`}
+    <div class="row" style="justify-content:center"><button class="btn primary" id="again">${S.mixed ? 'Next mixed problem' : 'New random problem'}</button><button class="btn" id="replay">Replay this one</button></div></div>`;
+  $('#say').innerHTML = S.mode === 'practice' ? (S.right === S.asked ? 'Perfect. Do one more to lock it in, then move on.' : 'Missed some? Hit Replay and step through the ones you got wrong, then do a new one.') : 'Your turn: practice on random problems.';
+  $('#ask').innerHTML = ''; $('#next').disabled = true; $('#bar').style.width = '100%';
+  $('#again').onclick = () => { if (S.mixed) openMixed(); else { S.mode = 'practice'; S.preset = null; start(S.topic.gen()); } };
+  $('#replay').onclick = () => { S.i = 0; S.tries = 0; draw(); };
+}
+function stopAuto() { if (S.auto) { clearInterval(S.auto); S.auto = null; const p = $('#play'); if (p) p.textContent = '▶ Play'; } }
+function toggleAuto() {
+  if (S.auto) return stopAuto();
+  $('#play').textContent = '❚❚ Pause';
+  S.auto = setInterval(() => {
+    const f = S.run.frames[S.i];
+    if (!f) return stopAuto();
+    if (f.ask && !S.solved[S.i]) { S.solved[S.i] = 'seen'; drawAsk(f); return; }
+    go(1);
+  }, 1900);
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (g) { const id = g.dataset.go; if (id === 'home') home(); else if (id === 'exam') openExam(); else if (id === 'mixed') openMixed(); else { S.preset = 0; openTopic(id, 'learn'); } window.scrollTo({ top: 0 }); return; }
+  const m = e.target.closest('[data-mode]');
+  if (m) { stopAuto(); S.mode = m.dataset.mode; if (S.mode === 'learn') { S.preset = +m.dataset.p; start(PRESETS[S.topic.id][S.preset].gen()); } else { S.preset = null; start(S.topic.gen()); } return; }
+  if (e.target.id === 'next') { stopAuto(); go(1); }
+  else if (e.target.id === 'back') { stopAuto(); go(-1); }
+  else if (e.target.id === 'play') toggleAuto();
+});
+document.addEventListener('keydown', e => {
+  if (!S.topic || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') { stopAuto(); go(1); } else if (e.key === 'ArrowLeft') { stopAuto(); go(-1); }
+});
+
+// ============================================================== MOCK FINAL EXAM
+function dfsPure(g, s) { const marked = new Set(), edgeTo = {}, order = []; (function go(v) { marked.add(v); order.push(v); for (const w of g.adj[v]) if (!marked.has(w)) { edgeTo[w] = v; go(w); } })(s); return { order, edgeTo, marked }; }
+function bfsPure(g, s) { const marked = new Set([s]), edgeTo = {}, order = [s], q = [s], dist = { [s]: 0 }; while (q.length) { const v = q.shift(); for (const w of g.adj[v]) if (!marked.has(w)) { marked.add(w); edgeTo[w] = v; dist[w] = dist[v] + 1; order.push(w); q.push(w); } } return { order, edgeTo, marked, dist }; }
+function topoPure(g) { const marked = new Set(), post = []; function go(v) { marked.add(v); for (const w of g.adj[v]) if (!marked.has(w)) go(w); post.push(v); } for (let v = 0; v < g.V; v++) if (!marked.has(v)) go(v); return { post, topo: [...post].reverse() }; }
+const edgeCells = (V, r, s) => range(V).map(v => v !== s && r.marked.has(v) ? String(r.edgeTo[v]) : '');
+const startV = g => pick(range(g.V).filter(v => g.adj[v].length > 1));
+const gfig = g => `<div class="row">${graphSVG(g, {})}${adjHTML(g)}</div>`;
+
+const XQ = {
+  sc() {
+    const m = 4, ks = shuffle(LET).slice(0, 5), hc = {}; ks.forEach(k => hc[k] = 1 + R(48));
+    hc[ks[1]] = (hc[ks[0]] % m) + m * (1 + R(8)); hc[ks[3]] = (hc[ks[0]] % m) + m * (1 + R(8));
+    const puts = ks.map((k, i) => [k, i + 1]); puts.splice(3 + R(2), 0, [ks[R(3)], 9]);
+    const chains = range(m).map(() => []);
+    for (const [k, v] of puts) { const ch = chains[hc[k] % m], h = ch.find(p => p[0] === k); if (h) h[1] = v; else ch.unshift([k, v]); }
+    const n = chains.reduce((a, c) => a + c.length, 0), L = Math.max(...chains.map(c => c.length)), li = chains.findIndex(c => c.length === L);
+    return { topic: 'sc', title: 'Separate chaining', pts: 10,
+      prompt: `<p>A <code>SeparateChainingHashST</code> with m = 4 (hash = hashCode % 4). New keys go at the front of their list. The calls, in order:</p><p><code>${puts.map(([k, v]) => `put(${k}, ${v})`).join('; ')}</code></p>${hcHTML(hc, ks)}`,
+      parts: [{ label: 'Average list length at the end (n / m)', num: true, answer: String(n / m), pts: 3 },
+        { label: 'Length of the longest list', num: true, answer: String(L), pts: 3 },
+        { label: `Keys in list ${li}, front to back`, answer: chains[li].map(p => p[0]).join(' '), pts: 4 }] };
+  },
+  lpput() {
+    const m = 8, n0 = pick([3, 4, 4]), ks = shuffle(LET).slice(0, n0 + 1), hc = {}, t = new LPT(m, hc), base = R(m);
+    ks.forEach(k => hc[k] = ((base + R(3)) % m) + m * (1 + R(5)));
+    ks.slice(0, n0).forEach(k => t.place(k)); const start = t.keys.slice(), nk = ks[n0];
+    let fin;
+    if (n0 >= m / 2) { const nt = new LPT(2 * m, hc); start.forEach(k => { if (k != null) nt.place(k); }); nt.place(nk); fin = nt; }
+    else { t.place(nk); fin = t; }
+    const cells = range(16).map(i => fin.keys[i] ?? '');
+    return { topic: 'lpput', title: 'Linear probing: put', pts: 12,
+      prompt: `<p>This <code>LinearProbingHashST</code> (hash = hashCode % m) is shown below. Draw the keys array after <b>put(${nk})</b>.</p><div class="row">${arrHTML(start, { label: 'keys[ ], m = 8' })}${hcHTML(hc, ks)}</div>`,
+      parts: [{ label: 'Array size m after the put', num: true, answer: String(fin.m), pts: 3 },
+        { label: 'keys[ ] after the put (if the table is smaller than 16, leave the extra slots blank)', cells, pts: 9 }] };
+  },
+  lpdel() {
+    for (;;) {
+      const m = 10, ks = shuffle(LET).slice(0, 4), hc = {}, t = new LPT(m, hc), base = R(m);
+      ks.forEach(k => hc[k] = ((base + R(3)) % m) + m * (1 + R(5))); ks.forEach(k => t.place(k));
+      const c = ks.filter(k => t.keys[(t.keys.indexOf(k) + 1) % m] != null); if (!c.length) continue;
+      const d = pick(c), start = t.keys.slice();
+      let i = t.keys.indexOf(d); t.keys[i] = null; i = (i + 1) % m;
+      while (t.keys[i] != null) { const k = t.keys[i]; t.keys[i] = null; t.n--; t.place(k); i = (i + 1) % m; }
+      return { topic: 'lpdel', title: 'Linear probing: delete', pts: 12,
+        prompt: `<p>Below is the keys array of a <code>LinearProbingHashST</code> (m = 10, hash = hashCode % 10). Draw it after <b>delete(${d})</b>.</p><div class="row">${arrHTML(start, { label: 'keys[ ] before' })}${hcHTML(hc, ks)}</div>`,
+        parts: [{ label: 'keys[ ] after the delete', cells: t.keys.map(k => k ?? ''), pts: 12 }] };
+    }
+  },
+  dfs() {
+    const g = genUGraph(), s = startV(g), r = dfsPure(g, s);
+    return { topic: 'dfs', title: 'Depth-first search', pts: 12,
+      prompt: `<p><code>g</code> is one of the book's Graph objects with the adjacency lists shown. A depth-first search is run by calling <b>dfs(g, ${s})</b>.</p>${gfig(g)}`,
+      parts: [{ label: 'In what order are the vertices marked?', answer: r.order.join(' '), pts: 6 },
+        { label: `Final edgeTo[ ] (leave ${s} and unreached vertices blank)`, cells: edgeCells(g.V, r, s), pts: 6, edge: true }] };
+  },
+  bfs() {
+    const g = genUGraph(), s = startV(g), r = bfsPure(g, s);
+    return { topic: 'bfs', title: 'Breadth-first search', pts: 12,
+      prompt: `<p>A breadth-first search is run on this Graph by calling <b>bfs(g, ${s})</b>.</p>${gfig(g)}`,
+      parts: [{ label: 'In what order are the vertices marked?', answer: r.order.join(' '), pts: 6 },
+        { label: `Final edgeTo[ ] (leave ${s} and unreached vertices blank)`, cells: edgeCells(g.V, r, s), pts: 6, edge: true }] };
+  },
+  path() {
+    for (;;) {
+      const g = genUGraph(), s = startV(g), r = bfsPure(g, s), far = r.order.filter(v => r.dist[v] >= 2);
+      if (!far.length) continue;
+      const t = pick(far), p = [t]; while (p[p.length - 1] !== s) p.push(r.edgeTo[p[p.length - 1]]); p.reverse();
+      return { topic: 'bfs', title: 'Shortest path from edgeTo', pts: 5,
+        prompt: `<p>A breadth-first search was run from vertex <b>${s}</b> on some graph. Here is the final edgeTo array (unset entries hold Java's default 0).</p>${arrHTML(range(g.V).map(v => r.marked.has(v) && v !== s ? r.edgeTo[v] : 0), { label: 'edgeTo[ ]' })}`,
+        parts: [{ label: `Shortest path from ${s} to ${t} (list the vertices)`, answer: p.join(' '), pts: 5 }] };
+    }
+  },
+  topo() {
+    const g = genDAG(), r = topoPure(g);
+    return { topic: 'topo', title: 'Topological sort', pts: 8,
+      prompt: `<p>The book's <code>DepthFirstOrder</code> runs on this Digraph (dfs from 0, 1, 2, … skipping marked vertices).</p>${gfig(g)}`,
+      parts: [{ label: 'Postorder (the order vertices finish)', answer: r.post.join(' '), pts: 4 },
+        { label: 'Topological order', answer: r.topo.join(' '), pts: 4 }] };
+  },
+  bst() {
+    for (;;) {
+      const keys = distinctNums(9, 5, 95), root = keys.reduce((r, k) => bstInsert(r, k), null), two = [];
+      (function w(x) { if (x) { if (x.left && x.right && x !== root) two.push(x); w(x.left); w(x.right); } })(root);
+      if (!two.length) continue;
+      const d = pick(two);
+      return { topic: 'bst', title: 'Binary search tree', pts: 8,
+        prompt: `<p>Keys are put into an empty BST in this order: <b>${keys.join(', ')}</b>. (Draw the tree on scratch paper.)</p>`,
+        parts: [{ label: 'Postorder traversal', answer: post(root).join(' '), pts: 4 },
+          { label: 'Preorder traversal', answer: pre(root).join(' '), pts: 2 },
+          { label: `delete(${d.key}): which key ends up in ${d.key}'s spot?`, num: true, answer: String(minNode(d.right).key), pts: 2 }] };
+    }
+  },
+  t23() {
+    const ks = distinctNums(10, 1, 60); let root = t23Build(ks.slice(0, 8)); const fig = t23SVG(root);
+    ks.slice(8).forEach(k => root = t23Insert(root, k, null));
+    let leaves = 0; (function w(n) { if (!n.kids.length) leaves++; n.kids.forEach(w); })(root);
+    return { topic: 't23', title: '2-3 tree insert', pts: 8,
+      prompt: `<p>Insert <b>${ks[8]}</b> and then <b>${ks[9]}</b> into this 2-3 tree.</p>${fig}`,
+      parts: [{ label: 'Keys in the root at the end', answer: root.keys.join(' '), pts: 4 },
+        { label: 'Number of leaves at the end', num: true, answer: String(leaves), pts: 4 }] };
+  },
+  llrb() {
+    const ks = distinctNums(6, 1, 60), root = llrbBuild(ks), reds = [];
+    (function w(x) { if (x) { if (x.red) reds.push(x.key); w(x.left); w(x.right); } })(root);
+    return { topic: 'llrb', title: 'Red-black tree insert', pts: 8,
+      prompt: `<p>Put these keys into an empty left-leaning red-black BST, in this order: <b>${ks.join(', ')}</b>.</p>`,
+      parts: [{ label: 'Key at the root', num: true, answer: String(root.key), pts: 3 },
+        { label: 'Keys whose link from their parent is red, smallest first (or "none")', answer: reds.length ? reds.sort((a, b) => a - b).join(' ') : 'none', pts: 5 }] };
+  },
+  rank() {
+    const keys = distinctNums(9, 1, 70).sort((a, b) => a - b); let k; do k = 2 + R(66); while (keys.includes(k));
+    let lo = 0, hi = keys.length - 1, mids = []; while (lo <= hi) { const mid = lo + Math.floor((hi - lo) / 2); mids.push(mid); if (k < keys[mid]) hi = mid - 1; else lo = mid + 1; }
+    return { topic: 'rank', title: 'BinarySearchST rank', pts: 5,
+      prompt: `<p>A <code>BinarySearchST</code> holds these keys. Trace <b>rank(${k})</b>.</p>${arrHTML(keys, { label: 'keys[ ]' })}`,
+      parts: [{ label: 'The values of mid, in order', answer: mids.join(' '), pts: 2 },
+        { label: `What does rank(${k}) return?`, num: true, answer: String(lo), pts: 2 },
+        { label: `floor(${k})? (or "none")`, answer: lo > 0 ? String(keys[lo - 1]) : 'none', pts: 1 }] };
+  },
+};
+const EXAM_ORDER = ['sc', 'lpput', 'lpdel', 'dfs', 'bfs', 'path', 'topo', 'bst', 't23', 'llrb', 'rank'];
+let E = null;
+const EKEY = 'csc301-final-lab-exam';
+function examBest() { try { return JSON.parse(localStorage.getItem(EKEY) || 'null'); } catch (e) { return null; } }
+function stopTimer() { if (E && E.timer) { clearInterval(E.timer); E.timer = null; } }
+function openExam() {
+  stopAuto(); stopTimer(); S.topic = null; S.mixed = false; S.exam = true; renderNav();
+  const best = examBest();
+  $('#main').innerHTML = `<section class="card exam-intro"><small class="cap">Mock final · new questions every time</small><h2>Mock final exam</h2>
+    <p>11 questions, <b>100 points</b>, 90 minutes. Same style as Quizzes 2–5: hash tables, DFS/BFS, topological sort, BST, 2-3, red-black, rank.</p>
+    <ul><li>Work it on <b>paper first</b>, like the real thing. Then type your answers in.</li>
+    <li>No hints and no checking until you submit. Then you get your score, partial credit on arrays, and every correct answer.</li>
+    <li>Type lists with spaces: <code>6 2 3 7 1</code>. Leave empty array slots blank.</li></ul>
+    ${best ? `<p class="score">Your best so far: ${best.score} / 100 (${best.date})</p>` : ''}
+    <div class="row"><button class="btn primary" id="xstart">Start the exam</button></div></section>`;
+  $('#xstart').onclick = startExam;
+}
+function startExam() {
+  E = { qs: EXAM_ORDER.map(id => XQ[id]()), t0: Date.now(), timer: null, done: false };
+  $('#main').innerHTML = `<div class="xbar card"><b>Mock final</b><span id="xtime" class="mono">90:00</span><span class="score">${E.qs.length} questions · 100 pts</span></div>
+    <form id="xform" class="xlist">${E.qs.map((q, qi) => `<section class="card xq" id="xq${qi}"><div class="head"><h3>${qi + 1}. ${q.title}</h3><span class="score">${q.pts} pts</span></div><div class="xprompt">${q.prompt}</div>
+      ${q.parts.map((p, pi) => `<div class="xpart"><label for="q${qi}p${pi}${p.cells ? 'c0' : ''}">${String.fromCharCode(97 + pi)}) ${p.label} <span class="score">(${p.pts})</span></label>
+        ${p.cells ? `<div class="xcells"><table class="arr"><tr>${p.cells.map((_, i) => `<th>${i}</th>`).join('')}</tr><tr>${p.cells.map((_, i) => `<td><input id="q${qi}p${pi}c${i}" autocomplete="off" maxlength="3" aria-label="slot ${i}"></td>`).join('')}</tr></table></div>`
+          : `<input id="q${qi}p${pi}" class="xin" autocomplete="off">`}<div class="xres" id="r${qi}p${pi}"></div></div>`).join('')}
+      <div class="xfoot" id="xf${qi}"></div></section>`).join('')}
+      <section class="card"><div class="row"><button type="button" class="btn primary" id="xsubmit">Submit exam</button><span id="xconfirm"></span></div></section></form>`;
+  const tick = () => { const left = 90 * 60 - Math.floor((Date.now() - E.t0) / 1000), a = Math.abs(left); const el = $('#xtime'); if (!el) return stopTimer(); el.textContent = `${left < 0 ? '+' : ''}${String(Math.floor(a / 60)).padStart(2, '0')}:${String(a % 60).padStart(2, '0')}${left < 0 ? ' over' : ' left'}`; el.classList.toggle('late', left < 0); };
+  tick(); E.timer = setInterval(tick, 1000);
+  $('#xform').onsubmit = e => e.preventDefault();
+  $('#xsubmit').onclick = () => {
+    const blanks = E.qs.reduce((a, q, qi) => a + q.parts.filter((p, pi) => p.cells ? p.cells.every((_, i) => !$(`#q${qi}p${pi}c${i}`).value.trim()) : !$(`#q${qi}p${pi}`).value.trim()).length, 0);
+    $('#xconfirm').innerHTML = `${blanks ? `${blanks} part${blanks > 1 ? 's are' : ' is'} still blank. ` : ''}Submit for grading? <button type="button" class="btn primary" id="xyes">Yes, grade it</button> <button type="button" class="btn" id="xno">Keep working</button>`;
+    $('#xyes').onclick = gradeExam; $('#xno').onclick = () => $('#xconfirm').innerHTML = '';
+  };
+  window.scrollTo({ top: 0 });
+}
+const normCell = s => String(s).trim().toUpperCase().replace(/^[-—–]$/, '');
+function gradeExam() {
+  stopTimer(); E.done = true;
+  let total = 0; const byTopic = {};
+  E.qs.forEach((q, qi) => {
+    let got = 0;
+    q.parts.forEach((p, pi) => {
+      let pts = 0, html;
+      if (p.cells) {
+        const vals = p.cells.map((_, i) => $(`#q${qi}p${pi}c${i}`).value);
+        let ok = 0;
+        const row = p.cells.map((c, i) => { const v = normCell(vals[i]), want = normCell(c); const good = v === want || (p.edge && want === '' && v === '0'); if (good) ok++; return { good, want: c }; });
+        if (vals.every(v => !v.trim())) { ok = 0; row.forEach(c => c.good = false); }
+        pts = Math.round(p.pts * ok / p.cells.length * 10) / 10;
+        row.forEach((c, i) => { const td = $(`#q${qi}p${pi}c${i}`).parentElement; td.classList.add(c.good ? 'okc' : 'badc'); });
+        html = `${ok === p.cells.length ? '✔ all slots right' : `${ok} / ${p.cells.length} slots right. Correct:`}${ok === p.cells.length ? '' : arrHTML(p.cells.map(c => c), {})}`;
+      } else {
+        const v = $(`#q${qi}p${pi}`).value, good = isRight({ num: p.num, answer: p.answer }, v);
+        pts = good ? p.pts : 0;
+        $(`#q${qi}p${pi}`).classList.add(good ? 'okc' : 'badc');
+        html = good ? '✔ right' : `✘ correct answer: <b class="mono">${esc(p.answer)}</b>`;
+      }
+      got += pts;
+      $(`#r${qi}p${pi}`).innerHTML = `<div class="fb ${pts === p.pts ? 'ok' : 'no'}">${html} <span class="score">${pts} / ${p.pts}</span></div>`;
+    });
+    $('#xform').querySelectorAll('input').forEach(i => i.readOnly = true);
+    total += got; const tp = q.topic; byTopic[tp] = byTopic[tp] || [0, 0]; byTopic[tp][0] += got; byTopic[tp][1] += q.pts;
+    $(`#xf${qi}`).innerHTML = `<div class="row"><b>${Math.round(got * 10) / 10} / ${q.pts}</b><button type="button" class="btn" data-go="${q.topic}">Learn this topic again →</button></div>`;
+  });
+  total = Math.round(total);
+  const mins = Math.round((Date.now() - E.t0) / 60000);
+  const best = examBest();
+  if (!best || total > best.score) { try { localStorage.setItem(EKEY, JSON.stringify({ score: total, date: new Date().toLocaleDateString() })); } catch (e) {} }
+  const weak = Object.entries(byTopic).filter(([, [g, p]]) => g / p < .8).map(([t]) => T.find(x => x.id === t));
+  const sum = document.createElement('section'); sum.className = 'card xsum';
+  sum.innerHTML = `<div class="big">${total} / 100</div><div>${total >= 93 ? 'A territory. Do one more to make sure it wasn\'t luck.' : total >= 80 ? 'Close. Fix the topics below, then take a fresh exam.' : 'Work through the topics below in Learn + Practice, then take a fresh exam.'} · ${mins} min</div>
+    <table class="mini xtopics"><tr><th>topic</th><th>score</th></tr>${Object.entries(byTopic).map(([t, [g, p]]) => `<tr><td style="text-align:left">${T.find(x => x.id === t).name}</td><td class="${g / p >= .8 ? '' : 'new'}">${Math.round(g * 10) / 10} / ${p}</td></tr>`).join('')}</table>
+    ${weak.length ? `<div class="row">${weak.map(t => `<button type="button" class="btn" data-go="${t.id}">Practice: ${t.name}</button>`).join('')}</div>` : ''}
+    <div class="row"><button type="button" class="btn primary" id="xagain">Take a new mock final</button></div>`;
+  $('#main').prepend(sum);
+  $('#xsubmit').closest('section').remove();
+  $('#xtime').textContent = 'graded';
+  $('#xagain').onclick = startExam;
+  window.scrollTo({ top: 0 });
+}
+
+window.LAB = { T, PRESETS, isRight, XQ, EXAM_ORDER };
+home();
+</script>
